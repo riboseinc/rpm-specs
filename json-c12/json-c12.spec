@@ -2,7 +2,7 @@
 %{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 
-Name:		json-c
+Name:		json-c12
 Version:	0.12.1
 Release:	1%{?dist}
 Summary:	JSON implementation in C
@@ -120,6 +120,9 @@ end
 
 
 %changelog
+* Mon May 8 2017 Jeffrey Lau <jeffrey.lau@ribose.comg> - 0.12.1-1
+- Change package name to json-c12 to prevent breaking compatability with 0.11.x
+
 * Thu Apr 27 2017 Björn Esser <besser82@fedoraproject.org> - 0.12.1-1
 - Update to new upstream release
 - Introduces SONAME bump, that should have been in 0.12 already
