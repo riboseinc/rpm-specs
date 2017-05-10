@@ -36,7 +36,7 @@ BuildRequires:	pkgconfig(pygobject-3.0)
 BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(fftw3)
 # Ensure we use version 6 (same as imagick ext).
-BuildRequires:	ImageMagick6-devel
+BuildRequires:	ImageMagick-devel
 BuildRequires:	pkgconfig(orc-0.4)
 BuildRequires:	pkgconfig(lcms2)
 BuildRequires:	pkgconfig(OpenEXR)

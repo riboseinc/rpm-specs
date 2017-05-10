@@ -12,7 +12,7 @@ Source0:        http://launchpad.net/mydumper/0.9/%{version}/+download/%{name}-%
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  glib2-devel mysql-devel zlib-devel pcre-devel
-BuildRequires:  cmake 
+BuildRequires:  cmake
 
 %description
 Mydumper (aka. MySQL Data Dumper) is a high-performance multi-threaded backup
@@ -56,13 +56,13 @@ rm -rf %{buildroot}
 - Ugly and fast rpm for CentOS 6.5
 
 * Mon Sep 29 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.2
-- Ugly fast rpm for CentOS 6.5 
+- Ugly fast rpm for CentOS 6.5
 
 * Mon Feb 28 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.1
-- Ugly fast rpm for CentOS 6 
+- Ugly fast rpm for CentOS 6
 
 * Mon Feb 28 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.0
-- Ugly fast rpm for CentOS 6 but it works 
+- Ugly fast rpm for CentOS 6 but it works
 
 * Thu Jan  3 2013 Remi Collet <remi@fedoraproject.org> - 0.2.3-2
 - don't break build because of warnings
