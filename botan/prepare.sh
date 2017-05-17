@@ -1,6 +1,8 @@
+yum install -y epel-release
+
 yum install -y automake gcc make openssl-devel zlib-devel bzip2-devel \
   boost-devel libtool git which gcc-c++ python-devel doxygen \
-  rpmdevtools wget
+  rpmdevtools wget epel-rpm-macros
 
 rpmdev-setuptree
 

@@ -1,6 +1,5 @@
 %global major_version 2
 %global reldate 20170517
-%{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 %if 0%{?fedora}
 %global with_python3 1
@@ -89,7 +88,7 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
   --bindir=%{_bindir} \
   --libdir=%{_libdir} \
   --includedir=%{_includedir} \
-  --docdir=%{_pkgdocdir} \
+  --docdir=%{_docdir} \
   --cc=gcc \
   --os=linux \
   --cpu=%{_arch} \
@@ -105,22 +104,28 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %install
 %make_install
 
-# %{_bindir}/find %{buildroot} -name '*.la' -delete -print
-# 
-# %{__mkdir} -p %{buildroot}/%{_pkgdocdir}
-# %{__cp} -pr doc/html ChangeLog README README.* %{buildroot}/%{_pkgdocdir}
-# %{_sbindir}/hardlink -cvf %{buildroot}/%{_pkgdocdir}
+# Remove unnecessary files
+
+%{__mkdir} -p %{buildroot}/%{_pkgdocdir}
+%{__rm} -f %{_pkgdocdir}/{news.txt,reading_list.txt}
+%{__cp} -pr %{_pkgdocdir}/* %{buildroot}/%{_pkgdocdir}
+
+%{__mkdir} -p %{buildroot}/%{_bindir}
+%{__cp} -pr %{_bindir}/%{name} %{buildroot}/%{_bindir}
+
+%{__mkdir} -p %{buildroot}/%{_libdir}
+%{__cp} -pr %{_libdir}/lib%{name}-%{major_version}* %{buildroot}/%{_libdir}
+%{__cp} -pr %{_libdir}/pythondummy.dummy %{buildroot}/%{_libdir}
+%{__rm} -f %{buildroot}%{_libdir}/pythondummy.dummy/site-packages/%{name}%{major_version}.pyc
+%{__rm} -f %{buildroot}%{_libdir}/pythondummy.dummy/site-packages/%{name}%{major_version}.pyo
+
+%{__mkdir} -p %{buildroot}/%{_libdir}/pkgconfig
+%{__cp} -pr %{_libdir}/pkgconfig/botan-%{major_version}.pc %{buildroot}/%{_libdir}/pkgconfig/
+
+%{__mkdir} -p %{buildroot}/%{_includedir}
+%{__cp} -pr %{_includedir}/%{name}-%{major_version} %{buildroot}/%{_includedir}
 
 # TODO: Install Python binding from "src/python/botan2.py"
-
-# TODO: Install documentation properly for Botan 2
-# fixups
-# find doc/examples -type f -exec chmod -x {} \;
-# mv doc/examples/python doc/python2-examples
-# cp -a doc/{examples,python2-examples,license.txt} \
-#    %{buildroot}%{_pkgdocdir}
-# cp -a %{SOURCE1} %{buildroot}%{_pkgdocdir}
-# rm -r %{buildroot}%{_pkgdocdir}/manual/{.doctrees,.buildinfo}
 
 
 %post -p /sbin/ldconfig
@@ -133,30 +138,31 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %files
 %doc %dir %{_pkgdocdir}
 %license %{_pkgdocdir}/license.txt
+%license %{_pkgdocdir}/pgpkey.txt
 %{_bindir}/botan
 %{_libdir}/lib%{name}-%{major_version}.so.*
-%{_libdir}/python*/site-packages/botan2.py
+
+%dir %{_libdir}/pythondummy.dummy/site-packages
+%{_libdir}/pythondummy.dummy/site-packages/botan2.py
 
 
 # TODO: Install files properly for Botan 2
 %files devel
-%doc %{_pkgdocdir}/doxygen
-%{_includedir}/%{name}/
+%doc %dir %{_pkgdocdir}
+%doc %{_pkgdocdir}/deprecated.txt
+%docdir %{_pkgdocdir}/doxygen
+%{_pkgdocdir}/doxygen
+%{_includedir}/%{name}-%{major_version}
 %exclude %{_libdir}/libbotan-%{major_version}.a
-%{_libdir}/libbotan-%{major_version}.so
-%{_libdir}/pkgconfig/botan-%{major_version}.pc
-# %{_libdir}/lib%{name}.so
 %{_libdir}/lib%{name}-%{major_version}.so
-%{_libdir}/pkgconfig/%{name}.pc
+%{_libdir}/pkgconfig/botan-%{major_version}.pc
 
 
 # TODO: Install files properly for Botan 2
 %files doc
-%dir %{_pkgdocdir}
+%doc %dir %{_pkgdocdir}
+%docdir %{_pkgdocdir}/manual
 %{_pkgdocdir}/manual
-# next files duplicated on purpose, because -doc doesn't depend on the
-# main package
-# %{_pkgdocdir}/readme.txt
 %license %{_pkgdocdir}/license.txt
 
 %check
