@@ -116,8 +116,6 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %{__mkdir} -p %{buildroot}/%{_libdir}
 %{__cp} -pr %{_libdir}/lib%{name}-%{major_version}* %{buildroot}/%{_libdir}
 %{__cp} -pr %{_libdir}/pythondummy.dummy %{buildroot}/%{_libdir}
-%{__rm} -f %{buildroot}%{_libdir}/pythondummy.dummy/site-packages/%{name}%{major_version}.pyc
-%{__rm} -f %{buildroot}%{_libdir}/pythondummy.dummy/site-packages/%{name}%{major_version}.pyo
 
 %{__mkdir} -p %{buildroot}/%{_libdir}/pkgconfig
 %{__cp} -pr %{_libdir}/pkgconfig/botan-%{major_version}.pc %{buildroot}/%{_libdir}/pkgconfig/
@@ -142,8 +140,9 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %{_bindir}/botan
 %{_libdir}/lib%{name}-%{major_version}.so.*
 
-%dir %{_libdir}/pythondummy.dummy/site-packages
-%{_libdir}/pythondummy.dummy/site-packages/botan2.py
+%{_libdir}/pythondummy.dummy/site-packages
+%exclude %{_libdir}/pythondummy.dummy/site-packages/botan2.py{c,o}
+
 
 
 # TODO: Install files properly for Botan 2
@@ -155,7 +154,7 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %{_includedir}/%{name}-%{major_version}
 %exclude %{_libdir}/libbotan-%{major_version}.a
 %{_libdir}/lib%{name}-%{major_version}.so
-%{_libdir}/pkgconfig/botan-%{major_version}.pc
+%{_libdir}/pkgconfig/%{name}-%{major_version}.pc
 
 
 # TODO: Install files properly for Botan 2
