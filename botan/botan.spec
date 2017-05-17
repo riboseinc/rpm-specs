@@ -1,4 +1,6 @@
 %global major_version 2
+%global reldate 20170517
+%{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 %if 0%{?fedora}
 %global with_python3 1
@@ -6,39 +8,34 @@
 
 Name:           botan
 Version:        %{major_version}.1.0
-Release:        7%{?dist}
+Release:        1%{?dist}
 Summary:        Crypto library written in C++
 
 Group:          System Environment/Libraries
 License:        BSD
 URL:            http://botan.randombit.net/
+Source0:	      %{url}/releases/Botan-%{version}.tgz
 # tarfile is stripped using repack.sh. original tarfile to be found
 # here: http://botan.randombit.net/releases/Botan-%%{version}.tgz
-Source0:        http://botan.randombit.net/releases/Botan-%%{version}.tgz
 #Source0:        Botan-%{version}.tgz
 
 BuildRequires:  gcc-c++
-BuildRequires:  python2
-BuildRequires:  python2-devel
 BuildRequires:  boost-devel
+BuildRequires:  bzip2-devel
+BuildRequires:  zlib-devel
+BuildRequires:  python
+BuildRequires:  python-devel
 %if 0%{?with_python3}
 BuildRequires:  python3
 BuildRequires:  python3-devel
 %endif # with_python3
 
-BuildRequires:  bzip2-devel
-BuildRequires:  zlib-devel
-
-%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 %description
-Botan is a BSD-licensed crypto library written in C++. It provides a
-wide variety of basic cryptographic algorithms, X.509 certificates and
-CRLs, PKCS \#10 certificate requests, a filter/pipe message processing
-system, and a wide variety of other features, all written in portable
-C++. The API reference, tutorial, and examples may help impart the
-flavor of the library.
-
+Botan is a BSD-licensed cryptographic library written in C++. It provides a
+wide variety of basic cryptographic algorithms, X.509 certificates and CRLs,
+PKCS \#10 certificate requests, a filter/pipe message processing system, and a
+wide variety of other features, all written in portable C++.
 
 %package        devel
 Summary:        Development files for %{name}
@@ -57,15 +54,14 @@ developing applications that use %{name}.
 Summary:        Documentation for %{name}
 Group:          Documentation
 BuildArch:      noarch
+BuildRequires:	doxygen
 
 %description    doc
-%{summary}
-
 This package contains HTML documentation for %{name}.
 
 
-# %package -n python2-%{name}
-# Summary:        Python2 bindings for %{name}
+# %package -n python-%{name}
+# Summary:        Python bindings for %{name}
 # Group:          System Environment/Libraries
 # %{?python_provide:%python_provide python2-%{name}}
 # # the python2 package was named botan-python up to 1.10.13-1
@@ -79,51 +75,41 @@ This package contains HTML documentation for %{name}.
 #
 # Note: The Python binding should be considered alpha software, and the
 # interfaces may change in the future.
-#
-# %if 0%{?with_python3}
-# %package -n python3-%{name}
-# Summary:        Python3 bindings for %{name}
-# Group:          System Environment/Libraries
-# %{?python_provide:%python_provide python3-%{name}}
-#
-# %description -n python3-%{name}
-# %{summary}
-#
-# This package contains the Python3 binding for %{name}.
-#
-# Note: The Python binding should be considered alpha software, and the
-# interfaces may change in the future.
-# %endif # with_python3
-
 
 %prep
-%setup -q -n Botan-%{version}
-
-# These tests will fail.
-## rm -rf checks/ec_tests.cpp
+# not %{name} here because Botan-x starts with a capital B
+%autosetup -n Botan-%{version}
+export CXXFLAGS="${CXXFLAGS:-%optflags}"
+# (ab)using CXX as an easy way to inject our CXXFLAGS
+export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 
 %build
 ./configure.py \
-        --prefix=%{_prefix} \
-        --libdir=%{_lib} \
-        --cc=gcc \
-        --os=linux \
-        --cpu=%{_arch} \
-        --with-boost \
-        --with-zlib \
-        --with-bzip2 \
-        --with-python-versions=dummy.dummy \
-        --with-sphinx
+  --prefix=%{_prefix} \
+  --bindir=%{_bindir} \
+  --libdir=%{_libdir} \
+  --includedir=%{_includedir} \
+  --docdir=%{_pkgdocdir} \
+  --cc=gcc \
+  --os=linux \
+  --cpu=%{_arch} \
+  --with-boost \
+  --with-zlib \
+  --with-bzip2 \
+  --with-python-versions=dummy.dummy \
+  --with-doxygen
+%make_build
 
-# (ab)using CXX as an easy way to inject our CXXFLAGS
-make CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}" %{?_smp_mflags}
+%{_bindir}/doxygen build/botan.doxy
 
 %install
-make install \
-     DESTDIR=%{buildroot}%{_prefix} \
-     DOCDIR=%{buildroot}%{_pkgdocdir} \
-     INSTALL_CMD_EXEC="install -p -m 755" \
-     INSTALL_CMD_DATA="install -p -m 644"
+%make_install
+
+# %{_bindir}/find %{buildroot} -name '*.la' -delete -print
+# 
+# %{__mkdir} -p %{buildroot}/%{_pkgdocdir}
+# %{__cp} -pr doc/html ChangeLog README README.* %{buildroot}/%{_pkgdocdir}
+# %{_sbindir}/hardlink -cvf %{buildroot}/%{_pkgdocdir}
 
 # TODO: Install Python binding from "src/python/botan2.py"
 
@@ -145,23 +131,23 @@ make install \
 
 # TODO: Install files properly for Botan 2
 %files
-%dir %{_pkgdocdir}
-%if 0%{?_licensedir:1}
+%doc %dir %{_pkgdocdir}
 %license %{_pkgdocdir}/license.txt
-%else
-%{_pkgdocdir}/license.txt
-%endif # licensedir
-%{_libdir}/libbotan-%{major_version}.so.*
+%{_bindir}/botan
+%{_libdir}/lib%{name}-%{major_version}.so.*
 %{_libdir}/python*/site-packages/botan2.py
 
 
 # TODO: Install files properly for Botan 2
 %files devel
-%{_bindir}/botan
-%{_includedir}/*
+%doc %{_pkgdocdir}/doxygen
+%{_includedir}/%{name}/
 %exclude %{_libdir}/libbotan-%{major_version}.a
 %{_libdir}/libbotan-%{major_version}.so
 %{_libdir}/pkgconfig/botan-%{major_version}.pc
+# %{_libdir}/lib%{name}.so
+%{_libdir}/lib%{name}-%{major_version}.so
+%{_libdir}/pkgconfig/%{name}.pc
 
 
 # TODO: Install files properly for Botan 2
@@ -171,12 +157,7 @@ make install \
 # next files duplicated on purpose, because -doc doesn't depend on the
 # main package
 # %{_pkgdocdir}/readme.txt
-%if 0%{?_licensedir:1}
 %license %{_pkgdocdir}/license.txt
-%else
-%{_pkgdocdir}/license.txt
-%endif # licensedir
-
 
 %check
 LD_LIBRARY_PATH=%{buildroot}%{_libdir} ./botan-test
