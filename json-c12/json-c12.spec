@@ -1,4 +1,5 @@
 %global reldate 20160607
+%global origname json-c
 %{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 
@@ -8,7 +9,7 @@ Release:	1%{?dist}
 Summary:	JSON implementation in C
 
 License:	MIT
-URL:		https://github.com/%{name}/%{name}
+URL:		https://github.com/%{origname}/%{origname}
 Source0:	%{url}/archive/json-c-%{version}-%{reldate}.tar.gz
 
 BuildRequires:	autoconf
@@ -45,7 +46,7 @@ This package contains the reference manual for json-c.
 
 
 %prep
-%autosetup -n %{name}-%{name}-%{version}-%{reldate}
+%autosetup -n %{origname}-%{name}-%{version}-%{reldate}
 
 for doc in ChangeLog; do
 	%{_bindir}/iconv -f iso-8859-1 -t utf8 ${doc} > ${doc}.new
