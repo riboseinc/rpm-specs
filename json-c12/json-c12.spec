@@ -5,7 +5,7 @@
 
 Name:		json-c12
 Version:	0.12.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	JSON implementation in C
 
 License:	MIT
@@ -46,7 +46,7 @@ This package contains the reference manual for json-c.
 
 
 %prep
-%autosetup -n %{origname}-%{name}-%{version}-%{reldate}
+%autosetup -n %{origname}-%{origname}-%{version}-%{reldate}
 
 for doc in ChangeLog; do
 	%{_bindir}/iconv -f iso-8859-1 -t utf8 ${doc} > ${doc}.new
@@ -84,7 +84,7 @@ done
 
 
 %pretrans devel -p <lua>
-path = "%{_includedir}/%{name}"
+path = "%{_includedir}/%{origname}"
 st = posix.stat(path)
 if st and st.type == "link" then
   os.remove(path)
@@ -101,27 +101,30 @@ end
 %doc %dir %{_pkgdocdir}
 %license AUTHORS
 %license COPYING
-%{_libdir}/lib%{name}.so.*
+%{_libdir}/lib%{origname}.so.*
 
 
 %files devel
 %doc %dir %{_pkgdocdir}
 %doc %{_pkgdocdir}/ChangeLog
 %doc %{_pkgdocdir}/README*
-%{_includedir}/%{name}/
-%{_libdir}/lib%{name}.so
-%{_libdir}/pkgconfig/%{name}.pc
+%{_includedir}/%{origname}/
+%{_libdir}/lib%{origname}.so
+%{_libdir}/pkgconfig/%{origname}.pc
 
 
 %files doc
 %if 0%{?fedora} || 0%{?rhel} >= 7
-%license %{_datadir}/licenses/%{name}*
+%license %{_datadir}/licenses/%{origname}*
 %endif # 0%%{?fedora} || 0%%{?rhel} >= 7
 %doc %{_pkgdocdir}
 
 
 %changelog
-* Mon May 8 2017 Jeffrey Lau <jeffrey.lau@ribose.comg> - 0.12.1-1
+* Mon May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 0.12.1-2
+- Update package to work with 0.12.1 properly
+
+* Mon May 8 2017 Jeffrey Lau <jeffrey.lau@ribose.com> - 0.12.1-1
 - Change package name to json-c12 to prevent breaking compatability with 0.11.x
 
 * Thu Apr 27 2017 Björn Esser <besser82@fedoraproject.org> - 0.12.1-1
