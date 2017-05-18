@@ -2,17 +2,16 @@
 
 Name:           mydumper
 Version:        0.9.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A high-performance MySQL backup tool
 
 Group:          Applications/Databases
 License:        GPLv3+
 URL:            https://github.com/maxbube/mydumper
-Source0:        https://github.com/maxbube/mydumper/archive/v%{version}.zip
+Source0:        %{url}/archive/v%{version}.tar.gz
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  glib2-devel mysql-devel zlib-devel pcre-devel
-BuildRequires:  cmake
+BuildRequires:  glib2-devel mysql-devel zlib-devel pcre-devel openssl-devel
+BuildRequires:  cmake python-sphinx
 
 %description
 Mydumper (aka. MySQL Data Dumper) is a high-performance multi-threaded backup
@@ -29,39 +28,47 @@ sed -e 's/-Werror//' -i CMakeLists.txt
 
 
 %build
-cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" .
-make %{?_smp_mflags} VERBOSE=1
+
+# TODO: enable BINLOG later. Enabling now gives error:
+# /usr/include/mysql/sql_common.h:26:18: fatal error: hash.h: No such file or directory
+# #include <hash.h>
+
+%cmake \
+  -DRUN_CPPCHECK=ON \
+  -DWITH_BINLOG=OFF
+
+%make_build
 
 
 %install
-rm -rf %{buildroot}
-
-make install DESTDIR=%{buildroot}
+%make_install
 
 rm -f %{buildroot}%{_datadir}/doc/%{name}/html/.buildinfo
 
 
-%clean
-rm -rf %{buildroot}
-
-
 %files
 %defattr(-,root,root,-)
+%doc %{_docdir}
 %{_bindir}/mydumper
 %{_bindir}/myloader
+%{_mandir}/man1/mydumper.*
+%{_mandir}/man1/myloader.*
 
 
 %changelog
+* Thu May 18 2016 Ronald Tse <ronald.tse@ribose.com> - 0.9.1-2
+- Works with CentOS 7.3 and includes docs
+
 * Mon Nov 16 2015 Vicente Dominguez <twitter:@vicendominguez> - 0.9.1
 - Ugly and fast rpm for CentOS 6.5
 
 * Mon Sep 29 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.2
 - Ugly fast rpm for CentOS 6.5
 
-* Mon Feb 28 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.1
+* Fri Feb 28 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.1
 - Ugly fast rpm for CentOS 6
 
-* Mon Feb 28 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.0
+* Fri Feb 28 2014 Vicente Dominguez <twitter:@vicendominguez> - 0.6.0
 - Ugly fast rpm for CentOS 6 but it works
 
 * Thu Jan  3 2013 Remi Collet <remi@fedoraproject.org> - 0.2.3-2
