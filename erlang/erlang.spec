@@ -299,6 +299,7 @@ EOF
 %{_libdir}/erlang/lib/crypto-*/
 %{_libdir}/erlang/lib/diameter-*/
 %{_libdir}/erlang/lib/edoc-*/
+%{_libdir}/erlang/lib/eldap-*/
 %{_libdir}/erlang/lib/erl_docgen-*/
 %{_libdir}/erlang/lib/erl_interface-*/
 %{_libdir}/erlang/lib/erts-*/
@@ -397,6 +398,6 @@ EOF
 
 %changelog
 
-* Mon May 19 2017 Ronald Tse <ronald.tse@ribose.com> - R15B01-1
+* Thu May 19 2017 Ronald Tse <ronald.tse@ribose.com> - R15B01-1
 - Build package R15B01
 
