@@ -169,7 +169,7 @@ LD_LIBRARY_PATH=%{buildroot}%{_libdir} ./botan-test
 
 
 %changelog
-* Tue May 16 2017 Ribose Packaging <packaging@ribose.com> - 2.1.0-1
+* Tue May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 2.1.0-1
 - Upgrade to 2.1.0
 
 * Mon May 15 2017 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.10.14-7
