@@ -8,7 +8,7 @@
 # Please preserve changelog entries
 #
 %global vips_version_base 8.5
-%global vips_version %{vips_version_base}.4
+%global vips_version %{vips_version_base}.5
 %global vips_soname_major 42
 
 %global with_python2 1
@@ -52,6 +52,9 @@ BuildRequires:	pkgconfig(openslide)
 BuildRequires:	pkgconfig(libgsf-1)
 BuildRequires:	pkgconfig(librsvg-2.0)
 BuildRequires:	pkgconfig(poppler-glib)
+%if 0%{?rhl}
+BuildRequires:	pkgconfig(gdk-pixbuf-xlib-2.0)
+%endif
 
 BuildRequires:	libjpeg-turbo-devel
 BuildRequires:	giflib-devel
@@ -228,6 +231,9 @@ find ${RPM_BUILD_ROOT}%{python3_sitearch} \
 
 
 %changelog
+* Thu May 19 2017 Ronald Tse <ronald.tse@ribose.com> - 8.5.5-1
+- Update to 8.5.5
+
 * Sun Apr 23 2017 Remi Collet <remi@remirepo.net> - 8.5.4-1
 - Update to 8.5.4
 
