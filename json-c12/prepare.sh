@@ -9,7 +9,7 @@ cd ~/rpmbuild/SOURCES/
 wget https://github.com/json-c/json-c/archive/json-c-0.12.1-20160607.tar.gz
 
 cd ~/rpmbuild/SPECS
-yes | cp -f /usr/local/json-c/json-c12.spec ~/rpmbuild/SPECS
+yes | cp -f /usr/local/json-c12/json-c12.spec ~/rpmbuild/SPECS
 cd ~/rpmbuild/SPECS; rpmbuild -ba json-c12.spec
 
 # cd /usr/local/botan
