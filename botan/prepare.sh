@@ -11,6 +11,5 @@ wget http://botan.randombit.net/releases/Botan-2.1.0.tgz
 
 cd ~/rpmbuild/SPECS
 cp /usr/local/botan/botan.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS; rpmbuild -ba botan.spec
 
-# cd /usr/local/botan
+rpmbuild ${RPMBUILD_FLAGS} botan.spec

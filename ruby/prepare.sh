@@ -15,5 +15,6 @@ wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.4.tar.gz
 
 cd ~/rpmbuild/SPECS
 yes | cp -f /usr/local/ruby/ruby.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS; rpmbuild -ba ruby.spec
+cd ~/rpmbuild/SPECS
 
+rpmbuild ${RPMBUILD_FLAGS} ruby.spec

@@ -15,5 +15,6 @@ yes | cp -f /usr/local/libgsf/*.patch ~/rpmbuild/SOURCES/
 
 cd ~/rpmbuild/SPECS
 yes | cp -f /usr/local/libgsf/libgsf.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS; rpmbuild -ba libgsf.spec
+cd ~/rpmbuild/SPECS
 
+rpmbuild ${RPMBUILD_FLAGS} libgsf.spec

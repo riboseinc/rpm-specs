@@ -16,5 +16,6 @@ wget https://github.com/maxbube/mydumper/archive/v0.9.1.tar.gz
 
 cd ~/rpmbuild/SPECS
 yes | cp -f /usr/local/mydumper/mydumper.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS; rpmbuild -ba mydumper.spec
+cd ~/rpmbuild/SPECS
 
+rpmbuild ${RPMBUILD_FLAGS} mydumper.spec

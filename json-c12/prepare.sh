@@ -10,6 +10,6 @@ wget https://github.com/json-c/json-c/archive/json-c-0.12.1-20160607.tar.gz
 
 cd ~/rpmbuild/SPECS
 yes | cp -f /usr/local/json-c12/json-c12.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS; rpmbuild -ba json-c12.spec
+cd ~/rpmbuild/SPECS
 
-# cd /usr/local/botan
+rpmbuild ${RPMBUILD_FLAGS} json-c12.spec

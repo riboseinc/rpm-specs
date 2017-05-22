@@ -21,5 +21,6 @@ wget https://github.com/processone/exmpp/archive/v0.9.9.tar.gz
 cd ~/rpmbuild/SPECS
 yes | cp -f /usr/local/exmpp/exmpp.spec ~/rpmbuild/SPECS
 cd ~/rpmbuild/SPECS
-${RPMBUILD_CMD} ${RPMBUILD_FLAGS} exmpp.spec
+
+rpmbuild ${RPMBUILD_FLAGS} exmpp.spec
 

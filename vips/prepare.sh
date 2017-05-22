@@ -21,5 +21,6 @@ wget https://github.com/jcupitt/libvips/releases/download/v8.5.5/vips-8.5.5.tar.
 
 cd ~/rpmbuild/SPECS
 yes | cp -f /usr/local/vips/vips.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS; rpmbuild -ba vips.spec
+cd ~/rpmbuild/SPECS
 
+rpmbuild ${RPMBUILD_FLAGS} vips.spec
