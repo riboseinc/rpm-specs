@@ -4,8 +4,10 @@ yum install -y automake autoconf libtool make cmake gcc-c++ \
   glib2-devel mysql-devel zlib-devel pcre-devel openssl-devel python-sphinx \
   rpmdevtools wget epel-rpm-macros
 
-yum install -y https://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
-yum install -y mysql mysql-community-devel
+# yum install -y https://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
+# yum install -y mysql mysql-community-devel
+
+yum install -y mysql mysql-devel
 
 rpmdev-setuptree
 
