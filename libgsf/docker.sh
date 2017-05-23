@@ -1,3 +1,3 @@
 #!/bin/bash
-docker run -it -v $(pwd):/usr/local/libgsf centos:7 bash
+docker run -it -v $(cd .. ; pwd):/usr/local/rpm-specs centos:7 bash
 

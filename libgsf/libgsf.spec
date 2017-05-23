@@ -1,10 +1,12 @@
 Summary: GNOME Structured File library
+Epoch: 3
 Name: libgsf
 Version: 1.14.41
-Release: 1%{?dist}
+Release: 1
 Group: System Environment/Libraries
 License: LGPLv2
 Source: ftp://ftp.gnome.org/pub/GNOME/sources/%{name}/1.14/%{name}-%{version}.tar.xz
+# Source: https://github.com/GNOME/%{name}/archive/LIBGSF_1_14_41.tar.gz
 URL: http://www.gnome.org/projects/libgsf/
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: glib2-devel, perl-XML-Parser
@@ -12,10 +14,6 @@ BuildRequires: libtool, libxml2-devel, glib2-devel, bzip2-devel, gettext
 BuildRequires: libbonobo-devel, pygtk2-devel, intltool, gnome-vfs2-devel
 Obsoletes: libgsf-gnome < 1.14.41
 Obsoletes: libgsf-python < 1.14.41
-
-#Patch0: libgsf-gnome-695907-selinux-use-tmpdir-for-tmpfile.patch
-#Patch1: libgsf-aarch64.patch
-#Patch2: libgsf-glib240.patch
 
 %description
 A library for reading and writing structured files (e.g. MS OLE and Zip)
@@ -33,9 +31,6 @@ libgsf.
 
 %prep
 %setup -q
-#%patch0 -p1 -b .gnome695907-selinux-use-tmpdir-for-tmpfile.patch
-#%patch1 -p1 -b .aarch64
-#%patch2 -p1 -b .glib240
 
 %build
 %configure --disable-gtk-doc --disable-static

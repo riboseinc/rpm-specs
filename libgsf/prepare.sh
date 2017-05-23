@@ -1,7 +1,6 @@
-yum install -y epel-release
+#!/bin/bash
 
-yum install -y automake autoconf libtool make gcc-c++ python2-devel \
-  rpmdevtools wget epel-rpm-macros
+. /usr/local/rpm-specs/setup_env.sh
 
 yum install -y intltool gettext glib2-devel gobject-introspection \
   libxml2-devel bzip2-devel pygobject3-devel \
@@ -9,12 +8,6 @@ yum install -y intltool gettext glib2-devel gobject-introspection \
 
 rpmdev-setuptree
 
-cd ~/rpmbuild/SOURCES/
-wget https://download.gnome.org/sources/libgsf/1.14/libgsf-1.14.41.tar.xz
-yes | cp -f /usr/local/libgsf/*.patch ~/rpmbuild/SOURCES/
-
-cd ~/rpmbuild/SPECS
-yes | cp -f /usr/local/libgsf/libgsf.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS
-
-rpmbuild ${RPMBUILD_FLAGS} libgsf.spec
+yes | cp -f /usr/local/rpm-specs/libgsf/libgsf.spec ~/rpmbuild/SPECS
+spectool -g -R ~/rpmbuild/SPECS/libgsf.spec
+rpmbuild -ba ${RPMBUILD_FLAGS} ~/rpmbuild/SPECS/libgsf.spec
