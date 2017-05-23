@@ -1,13 +1,17 @@
 %global major_version 2
+%global minor_version 1.0
 %global reldate 20170517
+%global real_name botan
+%global _pkgdocdir %{_docdir}/%{real_name}-%{version}
 
 %if 0%{?fedora}
 %global with_python3 1
 %endif
 
-Name:           botan
-Version:        %{major_version}.1.0
-Release:        1%{?dist}
+Name:           botan2
+Version:        %{major_version}.%{minor_version}
+Obsoletes:      botan
+Release:        1
 Summary:        Crypto library written in C++
 
 Group:          System Environment/Libraries
@@ -39,7 +43,7 @@ wide variety of other features, all written in portable C++.
 %package        devel
 Summary:        Development files for %{name}
 Group:          Development/Libraries
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{real_name}%{?_isa} = %{version}-%{release}
 Requires:       pkgconfig
 Requires:       bzip2-devel
 Requires:       zlib-devel
@@ -111,17 +115,17 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %{__cp} -pr %{_pkgdocdir}/* %{buildroot}/%{_pkgdocdir}
 
 %{__mkdir} -p %{buildroot}/%{_bindir}
-%{__cp} -pr %{_bindir}/%{name} %{buildroot}/%{_bindir}
+%{__cp} -pr %{_bindir}/%{real_name} %{buildroot}/%{_bindir}
 
 %{__mkdir} -p %{buildroot}/%{_libdir}
-%{__cp} -pr %{_libdir}/lib%{name}-%{major_version}* %{buildroot}/%{_libdir}
+%{__cp} -pr %{_libdir}/lib%{real_name}-%{major_version}* %{buildroot}/%{_libdir}
 %{__cp} -pr %{_libdir}/pythondummy.dummy %{buildroot}/%{_libdir}
 
 %{__mkdir} -p %{buildroot}/%{_libdir}/pkgconfig
 %{__cp} -pr %{_libdir}/pkgconfig/botan-%{major_version}.pc %{buildroot}/%{_libdir}/pkgconfig/
 
 %{__mkdir} -p %{buildroot}/%{_includedir}
-%{__cp} -pr %{_includedir}/%{name}-%{major_version} %{buildroot}/%{_includedir}
+%{__cp} -pr %{_includedir}/%{real_name}-%{major_version} %{buildroot}/%{_includedir}
 
 # TODO: Install Python binding from "src/python/botan2.py"
 
@@ -138,7 +142,7 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %license %{_pkgdocdir}/license.txt
 %license %{_pkgdocdir}/pgpkey.txt
 %{_bindir}/botan
-%{_libdir}/lib%{name}-%{major_version}.so.*
+%{_libdir}/lib%{real_name}-%{major_version}.so.*
 
 %{_libdir}/pythondummy.dummy/site-packages
 %exclude %{_libdir}/pythondummy.dummy/site-packages/botan2.py{c,o}
@@ -151,10 +155,10 @@ export CXX="g++ -std=c++11 -pthread ${CXXFLAGS:-%{optflags}}"
 %doc %{_pkgdocdir}/deprecated.txt
 %docdir %{_pkgdocdir}/doxygen
 %{_pkgdocdir}/doxygen
-%{_includedir}/%{name}-%{major_version}
+%{_includedir}/%{real_name}-%{major_version}
 %exclude %{_libdir}/libbotan-%{major_version}.a
-%{_libdir}/lib%{name}-%{major_version}.so
-%{_libdir}/pkgconfig/%{name}-%{major_version}.pc
+%{_libdir}/lib%{real_name}-%{major_version}.so
+%{_libdir}/pkgconfig/%{real_name}-%{major_version}.pc
 
 
 # TODO: Install files properly for Botan 2
@@ -169,7 +173,7 @@ LD_LIBRARY_PATH=%{buildroot}%{_libdir} ./botan-test
 
 
 %changelog
-* Tue May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 2.1.0-1
+* Thu May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 2.1.0-1
 - Upgrade to 2.1.0
 
 * Mon May 15 2017 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.10.14-7

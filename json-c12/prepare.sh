@@ -1,15 +1,9 @@
-yum install -y epel-release
+#!/bin/bash
 
-yum install -y automake autoconf libtool hardlink doxygen make \
-  rpmdevtools wget epel-rpm-macros
+. /usr/local/rpm-specs/setup_env.sh
 
-rpmdev-setuptree
+yum install -y intltool gettext glib2-devel gobject-introspection \
+  hardlink doxygen libxml2-devel bzip2-devel pygobject3-devel \
+  libbonobo-devel pygtk2-devel gnome-vfs2-devel
 
-cd ~/rpmbuild/SOURCES/
-wget https://github.com/json-c/json-c/archive/json-c-0.12.1-20160607.tar.gz
-
-cd ~/rpmbuild/SPECS
-yes | cp -f /usr/local/json-c12/json-c12.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS
-
-rpmbuild ${RPMBUILD_FLAGS} json-c12.spec
+build_package json-c12

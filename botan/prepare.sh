@@ -1,15 +1,8 @@
-yum install -y epel-release
+#!/bin/bash
 
-yum install -y automake gcc make openssl-devel zlib-devel bzip2-devel \
-  boost-devel libtool git which gcc-c++ python-devel doxygen \
-  rpmdevtools wget epel-rpm-macros
+. /usr/local/rpm-specs/setup_env.sh
 
-rpmdev-setuptree
+yum install -y openssl-devel zlib-devel bzip2-devel \
+  boost-devel which python-devel doxygen
 
-cd ~/rpmbuild/SOURCES/
-wget http://botan.randombit.net/releases/Botan-2.1.0.tgz
-
-cd ~/rpmbuild/SPECS
-cp /usr/local/botan/botan.spec ~/rpmbuild/SPECS
-
-rpmbuild ${RPMBUILD_FLAGS} botan.spec
+build_package botan

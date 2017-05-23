@@ -2,7 +2,7 @@
 
 Name:           mydumper
 Version:        0.9.1
-Release:        2%{?dist}
+Release:        2
 Summary:        A high-performance MySQL backup tool
 
 Group:          Applications/Databases
