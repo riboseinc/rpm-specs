@@ -21,7 +21,7 @@ A library for reading and writing structured files (e.g. MS OLE and Zip)
 %package devel
 Summary: Support files necessary to compile applications with libgsf
 Group: Development/Libraries
-Requires: libgsf = %{version}-%{release}, glib2-devel, libxml2-devel
+Requires: glib2-devel, libxml2-devel
 Requires: pkgconfig
 Obsoletes: libgsf-gnome-devel < 1.14.41
 
