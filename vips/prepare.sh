@@ -17,6 +17,7 @@ yum install -y openslide-devel openslide-python \
 rpmdev-setuptree
 
 cd ~/rpmbuild/SOURCES/
+[[ -r vips-8.5.5.tar.gz ]] || \
 wget https://github.com/jcupitt/libvips/releases/download/v8.5.5/vips-8.5.5.tar.gz
 
 cd ~/rpmbuild/SPECS
