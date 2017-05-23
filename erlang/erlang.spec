@@ -18,17 +18,18 @@
 
 
 Name:           erlang
+Epoch:          2
 Version:        R15B01
 Release:        0
 License:        Erlang Public License
 Summary:        General-purpose programming language and runtime environment
 Url:            http://www.erlang.org
 Group:          Development/Languages/Other
-Source:         otp_src_%{version}.tar.gz
+Source:         http://pkgs.fedoraproject.org/repo/pkgs/erlang/otp_src_R15B01.tar.gz/f12d00f6e62b36ad027d6c0c08905fad/otp_src_R15B01.tar.gz
 #Source:        http://www.erlang.org/download/otp_src_%{version}.tar.gz
-Source1:        otp_doc_html_%{version}.tar.gz
+Source1:        http://pkgs.fedoraproject.org/repo/pkgs/erlang/otp_doc_html_R15B01.tar.gz/7569cae680eecd64e7e5d952be788ee5/otp_doc_html_R15B01.tar.gz
 #Source1:       http://www.erlang.org/download/otp_doc_html_%{version}.tar.gz
-Source2:        otp_doc_man_%{version}.tar.gz
+Source2:        http://pkgs.fedoraproject.org/repo/pkgs/erlang/otp_doc_man_R15B01.tar.gz/d87412c2a1e6005bbe29dfe642a9ca20/otp_doc_man_R15B01.tar.gz
 #Source2:       http://www.erlang.org/download/otp_doc_man_%{version}.tar.gz
 Source3:        %{name}-rpmlintrc
 # PATCH-MISSING-TAG -- See http://en.opensuse.org/openSUSE:Packaging_Patches_guidelines
@@ -398,6 +399,6 @@ EOF
 
 %changelog
 
-* Thu May 19 2017 Ronald Tse <ronald.tse@ribose.com> - R15B01-1
+* Fri May 19 2017 Ronald Tse <ronald.tse@ribose.com> - R15B01-1
 - Build package R15B01
 

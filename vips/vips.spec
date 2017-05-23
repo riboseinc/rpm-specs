@@ -22,13 +22,13 @@
 
 Name:		vips
 Version:	%{vips_version}
-Release:	1%{?dist}
+Release:	1
 Summary:	C/C++ library for processing large images
 
 Group:		System Environment/Libraries
 License:	LGPLv2+
 URL:		http://jcupitt.github.io/libvips/
-Source0:	https://github.com/jcupitt/libvips/releases/download/v%{version}/vips-%{version}.tar.gz
+Source0:	https://github.com/jcupitt/libvips/releases/download/v%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires:	pkgconfig(glib-2.0)
 BuildRequires:	pkgconfig(gobject-introspection-1.0)
@@ -50,6 +50,7 @@ BuildRequires:	pkgconfig(libwebp)
 BuildRequires:	pkgconfig(libexif)
 BuildRequires:	pkgconfig(openslide)
 BuildRequires:	pkgconfig(libgsf-1)
+BuildRequires:	libgsf >= 1.14.41
 BuildRequires:	pkgconfig(librsvg-2.0)
 BuildRequires:	pkgconfig(poppler-glib)
 %if 0%{?rhl}

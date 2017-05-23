@@ -1,7 +1,6 @@
-yum install -y epel-release
+#!/bin/bash
 
-yum install -y automake autoconf libtool make gcc-c++ gettext python2-devel \
-  rpmdevtools wget epel-rpm-macros
+. /usr/local/rpm-specs/setup_env.sh
 
 yum install -y openslide-devel openslide-python \
   libpng-devel zlib-devel libtiff-devel \
@@ -14,14 +13,4 @@ yum install -y openslide-devel openslide-python \
   gobject-introspection-devel pygobject3-devel libgsf-devel \
   gdk-pixbuf2-devel
 
-rpmdev-setuptree
-
-cd ~/rpmbuild/SOURCES/
-[[ -r vips-8.5.5.tar.gz ]] || \
-wget https://github.com/jcupitt/libvips/releases/download/v8.5.5/vips-8.5.5.tar.gz
-
-cd ~/rpmbuild/SPECS
-yes | cp -f /usr/local/vips/vips.spec ~/rpmbuild/SPECS
-cd ~/rpmbuild/SPECS
-
-rpmbuild ${RPMBUILD_FLAGS} vips.spec
+build_package vips
