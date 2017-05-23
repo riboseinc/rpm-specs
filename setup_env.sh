@@ -14,4 +14,5 @@ build_package() {
 	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ~/rpmbuild/SPECS/${package_name}.spec || \
 		echo rpmbuild failed. Now yielding control to bash. >&2 && \
 		exec bash
+	return 0
 }
