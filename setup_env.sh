@@ -12,7 +12,8 @@ build_package() {
 	yes | cp -f /usr/local/rpm-specs/${package_name}/${package_name}.spec ~/rpmbuild/SPECS
 	spectool -g -R ~/rpmbuild/SPECS/${package_name}.spec
 	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ~/rpmbuild/SPECS/${package_name}.spec || \
-		echo rpmbuild failed. Now yielding control to bash. >&2 && \
-		exec bash
-	return 0
+		{
+			echo rpmbuild failed. Now yielding control to bash. >&2 && \
+			exec bash
+		}
 }
