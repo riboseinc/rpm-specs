@@ -231,7 +231,7 @@ find ${RPM_BUILD_ROOT}%{python3_sitearch} \
 
 
 %changelog
-* Thu May 19 2017 Ronald Tse <ronald.tse@ribose.com> - 8.5.5-1
+* Fri May 19 2017 Ronald Tse <ronald.tse@ribose.com> - 8.5.5-1
 - Update to 8.5.5
 
 * Sun Apr 23 2017 Remi Collet <remi@remirepo.net> - 8.5.4-1
