@@ -21,6 +21,7 @@
 %endif
 
 Name:		vips
+Epoch:	2
 Version:	%{vips_version}
 Release:	1%{?dist}
 Summary:	C/C++ library for processing large images
