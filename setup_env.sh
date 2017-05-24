@@ -9,6 +9,10 @@ yum install -y automake autoconf libtool make gcc-c++ gettext python2-devel \
 # Ensure all packages provide for "el7" not just "el7.centos"
 sed -i 's/el7.centos/el7/' /etc/rpm/macros.dist
 
+launched_from() {
+  echo "$(ps -o comm= $PPID)"
+}
+
 build_package() {
 	local readonly package_name="${1}"
 	rpmdev-setuptree
@@ -16,7 +20,10 @@ build_package() {
 	spectool -g -R ~/rpmbuild/SPECS/${package_name}.spec
 	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ~/rpmbuild/SPECS/${package_name}.spec || \
 		{
-			echo rpmbuild failed. Now yielding control to bash. >&2 && \
-			exec bash
+      echo "rpmbuild failed." >&2;
+      if [ "$(launched_from)" != "bash" ]; then
+        echo "Now yielding control to bash." >&2 && \
+        exec bash
+      fi
 		}
 }
