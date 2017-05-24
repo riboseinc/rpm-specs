@@ -20,7 +20,7 @@
 Name:           erlang
 Epoch:          2
 Version:        R15B01
-Release:        0
+Release:        1%{?dist}
 License:        Erlang Public License
 Summary:        General-purpose programming language and runtime environment
 Url:            http://www.erlang.org

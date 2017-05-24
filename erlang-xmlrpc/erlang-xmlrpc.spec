@@ -5,7 +5,7 @@
 Name:		erlang-xmlrpc
 Epoch:		2
 Version:	1.13
-Release:	1
+Release:	1%{?dist}
 Summary:	An Erlang XML-RPC library
 Group:		Development/Languages
 License:	ERPL

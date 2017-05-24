@@ -5,7 +5,7 @@
 Name:           ruby
 Version:        %{rubyver}
 Epoch:          2
-Release:        1
+Release:        1%{?dist}
 License:        Ruby License/GPL - see COPYING
 URL:            http://www.ruby-lang.org/
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)

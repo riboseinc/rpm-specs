@@ -4,7 +4,7 @@
 
 Name:		erlang-exmpp
 Version:	0.9.9
-Release:	1
+Release:	1%{?dist}
 Summary:	An Erlang XMPP library
 Group:		Development/Languages
 License:	ERPL

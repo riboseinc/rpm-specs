@@ -11,7 +11,7 @@
 Name:           botan2
 Version:        %{major_version}.%{minor_version}
 Obsoletes:      botan
-Release:        1
+Release:        1%{?dist}
 Summary:        Crypto library written in C++
 
 Group:          System Environment/Libraries

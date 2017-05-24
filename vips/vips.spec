@@ -22,7 +22,7 @@
 
 Name:		vips
 Version:	%{vips_version}
-Release:	1
+Release:	1%{?dist}
 Summary:	C/C++ library for processing large images
 
 Group:		System Environment/Libraries
