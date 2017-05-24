@@ -14,7 +14,6 @@ Source0:	%{url}/files/contributions/%{realname}-%{version}-ipr2.tgz
 
 BuildRequires:	autoconf automake libtool
 BuildRequires:	erlang >= R15B01
-BuildRequires:	git
 Provides:	%{realname} = %{version}-%{release}
 
 
