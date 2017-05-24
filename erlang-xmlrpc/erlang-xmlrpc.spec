@@ -3,7 +3,7 @@
 %{!?_pkgdocdir:%global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 Name:		erlang-xmlrpc
-Epoch:    1
+Epoch:		2
 Version:	1.13
 Release:	1
 Summary:	An Erlang XML-RPC library
