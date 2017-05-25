@@ -15,11 +15,19 @@ launched_from() {
 
 build_package() {
 	local readonly package_name="${1}"
+  local readonly additional_sources=/usr/local/rpm-specs/${package_name}/sources
+  local readonly spec_source=/usr/local/rpm-specs/${package_name}/${package_name}.spec
+  local readonly spec_dest=~/rpmbuild/SPECS/${package_name}.spec
+
 	rpmdev-setuptree
-	yes | cp -f /usr/local/rpm-specs/${package_name}/${package_name}.spec ~/rpmbuild/SPECS
-	yes | cp -f /usr/local/rpm-specs/${package_name}/sources/* ~/rpmbuild/SOURCES
-	spectool -g -R ~/rpmbuild/SPECS/${package_name}.spec
-	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ~/rpmbuild/SPECS/${package_name}.spec || \
+	yes | cp -f ${spec_source} ~/rpmbuild/SPECS
+
+  if [ -d ${additional_sources} ]; then
+    yes | cp -f ${additional_sources}/* ~/rpmbuild/SOURCES
+  fi
+
+	spectool -g -R ${spec_dest}
+	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
 		{
       echo "rpmbuild failed." >&2;
       if [ "$(launched_from)" != "bash" ]; then
