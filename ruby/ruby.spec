@@ -186,7 +186,9 @@ straight-forward, and extensible.
 Summary:    A Ruby development environment
 Group:      Development/Languages
 Requires:   %{name}%{?_isa} = %{version}-%{release}
+%if %{?with_rubypick}
 Requires:   rubypick
+%endif
 Requires:   rubygems
 
 %description devel
