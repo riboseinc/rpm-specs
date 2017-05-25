@@ -17,6 +17,7 @@ build_package() {
 	local readonly package_name="${1}"
 	rpmdev-setuptree
 	yes | cp -f /usr/local/rpm-specs/${package_name}/${package_name}.spec ~/rpmbuild/SPECS
+	yes | cp -f /usr/local/rpm-specs/${package_name}/${package_name}/sources/* ~/rpmbuild/SOURCES
 	spectool -g -R ~/rpmbuild/SPECS/${package_name}.spec
 	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ~/rpmbuild/SPECS/${package_name}.spec || \
 		{

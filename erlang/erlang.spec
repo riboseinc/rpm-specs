@@ -31,7 +31,7 @@ Source1:        http://pkgs.fedoraproject.org/repo/pkgs/erlang/otp_doc_html_R15B
 #Source1:       http://www.erlang.org/download/otp_doc_html_%{version}.tar.gz
 Source2:        http://pkgs.fedoraproject.org/repo/pkgs/erlang/otp_doc_man_R15B01.tar.gz/d87412c2a1e6005bbe29dfe642a9ca20/otp_doc_man_R15B01.tar.gz
 #Source2:       http://www.erlang.org/download/otp_doc_man_%{version}.tar.gz
-Source3:        %{name}-rpmlintrc
+Source3:        %{name}.rpmlintrc
 # PATCH-MISSING-TAG -- See http://en.opensuse.org/openSUSE:Packaging_Patches_guidelines
 #Patch0:         otp-R15B01-rpath.patch
 BuildRequires:  gcc-c++

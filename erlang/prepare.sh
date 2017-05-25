@@ -14,8 +14,6 @@ pwd
 # curl -L -O http://pkgs.fedoraproject.org/repo/pkgs/erlang/otp_doc_html_R15B01.tar.gz/7569cae680eecd64e7e5d952be788ee5/otp_doc_html_R15B01.tar.gz
 # curl -L -O http://pkgs.fedoraproject.org/repo/pkgs/erlang/otp_doc_man_R15B01.tar.gz/d87412c2a1e6005bbe29dfe642a9ca20/otp_doc_man_R15B01.tar.gz
 
-echo 'addFilter("erlang.* devel-file-in-non-devel-package")' > ~/rpmbuild/SOURCES/erlang-rpmlintrc
-
 export QA_RPATHS=$[ 0x0001|0x0010|0x0002 ]
 
 build_package erlang
