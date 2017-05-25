@@ -64,7 +64,7 @@ Summary: An interpreter of object-oriented scripting language
 Name: ruby
 Version: %{ruby_version}
 Release: %{release_string}
-Epoch: 2
+#Epoch: 2
 Group: Development/Languages
 # Public Domain for example for: include/ruby/st.h, strftime.c, missing/*, ...
 # MIT and CCO: ccan/*
