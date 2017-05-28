@@ -544,7 +544,7 @@ make %{?_smp_mflags} COPY="cp -p" Q=
 
 %install
 rm -rf %{buildroot}
-make install DESTDIR=%{buildroot}
+%make_install
 
 # Rename ruby/config.h to ruby/config-<arch>.h to avoid file conflicts on
 # multilib systems and install config.h wrapper
