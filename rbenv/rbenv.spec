@@ -1,4 +1,3 @@
-%global rbenv_path %{_prefix}/%{name}
 %global rubies_path %{_datarootdir}/rubies
 %global system_profile_directory %{_sysconfdir}/profile.d
 %global profile_rbenv_script_filename %{system_profile_directory}/%{name}.sh
