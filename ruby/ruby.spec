@@ -169,7 +169,7 @@ BuildRequires: procps
 BuildRequires: %{_bindir}/dtrace
 # RubyGems test suite optional dependencies.
 BuildRequires: git
-BuildRequires: %{_bindir}/cmake
+BuildRequires: cmake
 
 # This package provides %%{_bindir}/ruby-mri therefore it is marked by this
 # virtual provide. It can be installed as dependency of rubypick.
