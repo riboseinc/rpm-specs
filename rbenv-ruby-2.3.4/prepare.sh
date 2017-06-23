@@ -11,8 +11,9 @@ yum install -y ruby-build rbenv
 export QA_RPATHS=$[ 0x0002 ]
 build_package rbenv-ruby-2.3.4
 
-yum install -y /root/rpmbuild/RPMS/x86_64/*.rpm
-curl --fail -sSLo /etc/yum.repos.d/passenger.repo https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo
-yum install -y nginx passenger
-
-exec bash
+# Enable the following lines to test compatabilty with passenger packages.
+#
+# yum install -y /root/rpmbuild/RPMS/x86_64/*.rpm
+# curl --fail -sSLo /etc/yum.repos.d/passenger.repo https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo
+# yum install -y nginx passenger
+# exec bash
