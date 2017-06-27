@@ -6,3 +6,5 @@ yum install -y openssl-devel readline-devel zlib-devel
 
 build_package ruby-build
 
+yum install -y /root/rpmbuild/RPMS/noarch/ruby-build-*.rpm
+

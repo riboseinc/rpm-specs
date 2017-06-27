@@ -11,7 +11,13 @@ Source0:       %{url}/archive/v%{version}.tar.gz
 BuildRequires: redhat-rpm-config
 
 # For compiling rubies
-Requires: openssl-devel readline-devel zlib-devel readline libyaml libyaml-devel readline-devel ncurses ncurses-devel gdbm gdbm-devel glibc-devel tcl-devel gcc unzip openssl-devel db4-devel byacc make libffi-devel
+Requires: openssl-devel readline-devel zlib-devel readline libyaml libyaml-devel readline-devel ncurses ncurses-devel gdbm gdbm-devel glibc-devel tcl-devel gcc unzip openssl-devel byacc make libffi-devel
+
+%if 0%{?el7}
+Requires: compat-db47
+%else
+Requires: db4-devel
+%endif
 
 # For running rubies
 Requires: openssl libyaml
