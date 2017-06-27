@@ -40,6 +40,9 @@ src/configure
 #%{_sbindir}/hardlink -cvf %{buildroot}/%{_pkgdocdir}
 %{__rm} -rf src
 %{__rm} -f .agignore .gitignore .vimrc .travis.yml
+%{__mkdir} -p %{buildroot}/%{rubies_path}
+%{__mkdir} -p %{buildroot}/%{rubies_path}/shims
+%{__mkdir} -p %{buildroot}/%{rubies_path}/versions
 %{__mkdir} -p %{buildroot}/%{_pkgdocdir}
 %{__mv} LICENSE README.md %{buildroot}/%{_pkgdocdir}
 %{__mkdir} -p %{buildroot}/%{_datarootdir}/%{name}
@@ -69,6 +72,9 @@ echo "rbenv is installed in %{rubies_path}. Please install rbenv-ruby packages y
 
 %files
 %doc %dir %{_pkgdocdir}
+%dir %{rubies_path}/shims
+%dir %{rubies_path}/versions
+%dir %{rubies_path}
 %{_datarootdir}/%{name}
 %license %{_pkgdocdir}/LICENSE
 %{_pkgdocdir}/README.md
