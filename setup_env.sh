@@ -1,13 +1,18 @@
-rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
-curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
+install_base_packages() {
+  rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+  curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
 
-yum install -y epel-release
+  yum install -y epel-release
 
-yum install -y automake autoconf libtool make gcc-c++ gettext python2-devel \
-  rpmdevtools git epel-rpm-macros
+  yum install -y automake autoconf libtool make gcc-c++ gettext python2-devel \
+    rpmdevtools git epel-rpm-macros
 
-# Ensure all packages provide for "el7" not just "el7.centos"
-sed -i 's/el7.centos/el7/' /etc/rpm/macros.dist
+  # Ensure all packages provide for "el7" not just "el7.centos"
+  sed -i 's/el7.centos/el7/' /etc/rpm/macros.dist
+
+  # Yum should always install doc files for debugging specs
+  sed -i '/nodocs/d' /etc/yum.conf
+}
 
 launched_from() {
   echo "$(ps -o comm= $PPID)"
@@ -36,3 +41,6 @@ build_package() {
       fi
 		}
 }
+
+install_base_packages
+
