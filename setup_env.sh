@@ -1,11 +1,14 @@
+#!/bin/bash -x
+
 install_base_packages() {
   rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
   curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
 
   yum install -y epel-release
 
+  # jq is needed for building npm packages, to read the 'bins' from package.json
   yum install -y automake autoconf libtool make gcc-c++ gettext python2-devel \
-    rpmdevtools git epel-rpm-macros
+    rpmdevtools git epel-rpm-macros jq
 
   # Ensure all packages provide for "el7" not just "el7.centos"
   sed -i 's/el7.centos/el7/' /etc/rpm/macros.dist
@@ -53,19 +56,34 @@ modify_spec() {
   local spec_dest=$2
 
   # XXX: this line is necessary because speculate can't find the "License:" of redis-dump
-  replace_string="s/^License:[[:space:]]*$/License: MIT/"
+  replace_string="s|^License:[[:space:]]*$|License: MIT|"
   sed -i "${replace_string}" ${spec_dest}
 
-  # XXX: these lines are used to create /usr/bin/{exec} links, speculate doesn't create them
-  # TODO: need to adapt for the packages that don't provide /usr/lib/%{package_name}/bin.
-  replace_string="s/%post/%{__mkdir} -p %{buildroot}\/%{_bindir}\nchmod +x %{buildroot}\/usr\/lib\/${package_name}\/bin\/*\ncd %{buildroot}\/%{_bindir}\n%{__ln_s} ..\/lib\/${package_name}\/bin\/* .\n\n%post\n/"
+  replace_string="s|%post|%{__mkdir} -p %{buildroot}/%{_bindir}\n\n%post|"
   sed -i "${replace_string}" ${spec_dest}
-  replace_string="s/%files/%files\n%{_bindir}\/*\n/"
+  replace_string="s|%files|%files\n%{_bindir}/*\n|"
   sed -i "${replace_string}" ${spec_dest}
 
   # XXX: somehow speculate makes all executables un-executable
   replace_string="/defattr/d"
   sed -i "${replace_string}" ${spec_dest}
+}
+
+# XXX: these lines are used to create /usr/bin/{exec} links, speculate doesn't create them
+# TODO: patch speculate and push upstream
+# TODO: need to adapt for the packages that don't provide /usr/lib/%{package_name}/bin.
+
+add_npm_bin() {
+  local package_name=$1
+  local spec=$2
+  #local bin_name=$3
+  local bin_path=$3
+
+  replace_string="s|%post|pushd %{buildroot}/%{_bindir}\nchmod +x ../lib/${package_name}/${bin_path}\n%{__ln_s} ../lib/${package_name}/${bin_path} .\npopd\n\n%post\n|"
+  #echo "ADDNPMBIN-------------------------" >&2
+  #echo "${package_name}" >&2
+  #echo "${bin_path}" >&2
+  sed -i "${replace_string}" ${spec}
 }
 
 build_npm_package() {
@@ -88,6 +106,16 @@ build_npm_package() {
   npm remove --global ${package_name}
 
   modify_spec ${package_name} ${spec_dest}
+
+  # Obtain package.json
+  pushd ~/rpmbuild/SOURCES
+  tar -zvxf ${package_name}.tar.gz package.json
+  bins=$(jq -r '.bin | to_entries | map("\(.value)") | .[]' package.json)
+  #echo "BINSBINSBINSBINBINSBINBINSBINBINSBINSSSS" >&2
+  #echo "${bins}" >&2
+  for b in ${bins}; do
+    add_npm_bin ${package_name} ${spec_dest} ${b}
+  done
 
 	spectool -g -R ${spec_dest}
 	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
