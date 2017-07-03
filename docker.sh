@@ -5,4 +5,5 @@ if [[ $# = 1 ]]; then
   readonly EXTRA="-c /usr/local/rpm-specs/"${1}"/prepare.sh"
 fi
 
-docker run -it -v "$n":/usr/local/rpm-specs centos:7 bash $EXTRA
+# docker run -it -v "$n":/usr/local/rpm-specs centos:7 bash $EXTRA
+docker run  --cap-add=SYS_ADMIN -it -v "$n":/usr/local/rpm-specs fedora bash $EXTRA
