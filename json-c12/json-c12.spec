@@ -121,7 +121,7 @@ end
 
 
 %changelog
-* Mon May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 0.12.1-2
+* Thu May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 0.12.1-2
 - Update package to work with 0.12.1 properly
 
 * Mon May 8 2017 Jeffrey Lau <jeffrey.lau@ribose.com> - 0.12.1-1
