@@ -5,7 +5,7 @@
 
 Name:		json-c12
 Version:	0.12.1
-Release:	2
+Release:	2%{?dist}
 Summary:	JSON implementation in C
 
 License:	MIT
