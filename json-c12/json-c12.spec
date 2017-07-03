@@ -5,8 +5,8 @@
 
 Name:		json-c12
 Version:	0.12.1
-Release:	2%{?dist}
-Summary:	JSON implementation in C
+Release:	3%{?dist}
+Summary:	JSON implementation in C (0.12 compatability package)
 
 License:	MIT
 URL:		https://github.com/%{origname}/%{origname}
@@ -55,6 +55,24 @@ for doc in ChangeLog; do
 done
 
 %{__sed} -i 's|-Werror ||g' Makefile.am.inc
+
+# For the compatability package
+%{__sed} -i 's|json-c.pc|json-c12.pc|g' Makefile.am
+%{__sed} -i 's|libjson-c|libjson-c12|g' Makefile.am
+%{__sed} -i 's|libjson_c|libjson_c12|g' Makefile.am
+%{__sed} -i 's|/json-c|/json-c12|g' Makefile.am
+%{__sed} -i 's|libjson-c|libjson-c12|g' tests/Makefile.am
+
+%{__sed} -i 's|json-c.pc|json-c12.pc|g' configure.ac
+%{__sed} -i 's|json-c-uninstalled.pc|json-c12-uninstalled.pc|g' configure.ac
+
+%{__sed} -i 's|ljson-c|ljson-c12|g' json-c.pc.in
+%{__sed} -i 's|ljson-c|ljson-c12|g' json-c-uninstalled.pc.in
+%{__mv} json-c.pc.in json-c12.pc.in
+%{__mv} json-c-uninstalled.pc.in json-c12-uninstalled.pc.in
+%{__mv} json-c.vcproj json-c12.vcproj
+
+%{_bindir}/autoupdate -v
 %{_bindir}/autoreconf -fiv
 
 
@@ -76,7 +94,7 @@ done
 
 %{__mkdir} -p %{buildroot}/%{_pkgdocdir}
 %{__cp} -pr doc/html ChangeLog README README.* %{buildroot}/%{_pkgdocdir}
-%{_sbindir}/hardlink -cvf %{buildroot}/%{_pkgdocdir}
+%{_sbindir}/hardlink -cv %{buildroot}/%{_pkgdocdir}
 
 
 %check
@@ -101,26 +119,29 @@ end
 %doc %dir %{_pkgdocdir}
 %license AUTHORS
 %license COPYING
-%{_libdir}/lib%{origname}.so.*
+%{_libdir}/lib%{name}.so.*
 
 
 %files devel
 %doc %dir %{_pkgdocdir}
 %doc %{_pkgdocdir}/ChangeLog
 %doc %{_pkgdocdir}/README*
-%{_includedir}/%{origname}/
-%{_libdir}/lib%{origname}.so
-%{_libdir}/pkgconfig/%{origname}.pc
+%{_includedir}/%{name}/
+%{_libdir}/lib%{name}.so
+%{_libdir}/pkgconfig/%{name}.pc
 
 
 %files doc
 %if 0%{?fedora} || 0%{?rhel} >= 7
-%license %{_datadir}/licenses/%{origname}*
+%license %{_datadir}/licenses/%{name}*
 %endif # 0%%{?fedora} || 0%%{?rhel} >= 7
 %doc %{_pkgdocdir}
 
 
 %changelog
+* Tue Jul 4 2017 Ronald Tse <ronald.tse@ribose.com> - 0.12.1-3
+- Update package for fedora-review
+
 * Thu May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 0.12.1-2
 - Update package to work with 0.12.1 properly
 
