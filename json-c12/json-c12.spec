@@ -5,8 +5,8 @@
 
 Name:		json-c12
 Version:	0.12.1
-Release:	3%{?dist}
-Summary:	JSON implementation in C (0.12 compatability package)
+Release:	4%{?dist}
+Summary:	JSON implementation in C (0.12 compatibility package)
 
 License:	MIT
 URL:		https://github.com/%{origname}/%{origname}
@@ -56,7 +56,7 @@ done
 
 %{__sed} -i 's|-Werror ||g' Makefile.am.inc
 
-# For the compatability package
+# For the compatibility package
 %{__sed} -i 's|json-c.pc|json-c12.pc|g' Makefile.am
 %{__sed} -i 's|libjson-c|libjson-c12|g' Makefile.am
 %{__sed} -i 's|libjson_c|libjson_c12|g' Makefile.am
@@ -146,7 +146,7 @@ end
 - Update package to work with 0.12.1 properly
 
 * Mon May 8 2017 Jeffrey Lau <jeffrey.lau@ribose.com> - 0.12.1-1
-- Change package name to json-c12 to prevent breaking compatability with 0.11.x
+- Change package name to json-c12 to prevent breaking compatibility with 0.11.x
 
 * Thu Apr 27 2017 Björn Esser <besser82@fedoraproject.org> - 0.12.1-1
 - Update to new upstream release
