@@ -65,6 +65,7 @@ done
 
 %{__sed} -i 's|json-c.pc|json-c12.pc|g' configure.ac
 %{__sed} -i 's|json-c-uninstalled.pc|json-c12-uninstalled.pc|g' configure.ac
+%{__sed} -i 's|AM_LANG_POP|LT_INIT|g' configure.ac
 
 %{__sed} -i 's|ljson-c|ljson-c12|g' json-c.pc.in
 %{__sed} -i 's|ljson-c|ljson-c12|g' json-c-uninstalled.pc.in
