@@ -5,7 +5,7 @@
 
 Name:		json-c12
 Version:	0.12.1
-Release:	3%{?dist}
+Release:	1%{?dist}
 Summary:	JSON implementation in C (0.12 compatibility package)
 
 License:	MIT
@@ -140,14 +140,8 @@ end
 
 
 %changelog
-* Tue Jul 4 2017 Ronald Tse <ronald.tse@ribose.com> - 0.12.1-3
-- Update package for fedora-review
-
-* Thu May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 0.12.1-2
-- Update package to work with 0.12.1 properly
-
 * Mon May 8 2017 Jeffrey Lau <jeffrey.lau@ribose.com> - 0.12.1-1
-- Change package name to json-c12 to prevent breaking compatibility with 0.11.x
+- Initial compat-package for EPEL >= 6, based on json-c from recent Fedora
 
 * Thu Apr 27 2017 Björn Esser <besser82@fedoraproject.org> - 0.12.1-1
 - Update to new upstream release
