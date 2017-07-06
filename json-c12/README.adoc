@@ -1,0 +1,8 @@
+= json-c12
+
+== Patches
+
+* https://patch-diff.githubusercontent.com/raw/json-c/json-c/pull/333.patch
+** Replace obsolete AC_PROG_LIBTOOL
+* https://github.com/besser82/json-c/commit/9b0b9f3c00078a0ec7a63eb8a252a24f69ae0922.patch
+** Rename for json-c12 epel-compat
