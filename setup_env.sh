@@ -28,27 +28,27 @@ launched_from() {
 }
 
 build_package() {
-	local readonly package_name="${1}"
+  local readonly package_name="${1}"
   local readonly additional_sources=/usr/local/rpm-specs/${package_name}/sources
   local readonly spec_source=/usr/local/rpm-specs/${package_name}/${package_name}.spec
   local readonly spec_dest=~/rpmbuild/SPECS/${package_name}.spec
 
-	rpmdev-setuptree
-	yes | cp -f ${spec_source} ~/rpmbuild/SPECS
+  rpmdev-setuptree
+  yes | cp -f ${spec_source} ~/rpmbuild/SPECS
 
   if [ -d ${additional_sources} ]; then
     yes | cp -f ${additional_sources}/* ~/rpmbuild/SOURCES
   fi
 
-	spectool -g -R ${spec_dest}
-	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
-		{
+  spectool -g -R ${spec_dest}
+  rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
+    {
       echo "rpmbuild failed." >&2;
       if [ "$(launched_from)" != "bash" ]; then
         echo "Now yielding control to bash." >&2 && \
         exec bash
       fi
-		}
+    }
 }
 
 modify_spec() {
@@ -87,7 +87,7 @@ add_npm_bin() {
 }
 
 build_npm_package() {
-	local readonly package_name="${1}"
+  local readonly package_name="${1}"
   #local readonly additional_sources=/usr/local/rpm-specs/${package_name}/sources
   local readonly sources_source=/usr/lib/node_modules/${package_name}/SOURCES/${package_name}.tar.gz
   local readonly spec_source=/usr/lib/node_modules/${package_name}/SPECS/${package_name}.spec
@@ -95,14 +95,14 @@ build_npm_package() {
 
   npm install --global ${package_name}
 
-	rpmdev-setuptree
+  rpmdev-setuptree
 
   pushd /usr/lib/node_modules/${package_name}
   speculate
   popd
 
-	yes | cp -f ${sources_source} ~/rpmbuild/SOURCES
-	yes | cp -f ${spec_source} ${spec_dest}
+  yes | cp -f ${sources_source} ~/rpmbuild/SOURCES
+  yes | cp -f ${spec_source} ${spec_dest}
   npm remove --global ${package_name}
 
   modify_spec ${package_name} ${spec_dest}
@@ -117,16 +117,17 @@ build_npm_package() {
     add_npm_bin ${package_name} ${spec_dest} ${b}
   done
 
-	spectool -g -R ${spec_dest}
-	rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
-		{
+  spectool -g -R ${spec_dest}
+  rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
+    {
       echo "rpmbuild failed." >&2;
       if [ "$(launched_from)" != "bash" ]; then
         echo "Now yielding control to bash." >&2 && \
-        exec bash
+          exec bash
       fi
-		}
+    }
 }
 
 install_base_packages
 
+# vim:et:sw=2:sts=2:ts=2
