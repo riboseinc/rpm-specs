@@ -1,8 +1,23 @@
 #!/bin/bash
 n=$(cd $(dirname $0); pwd)
 
-if [[ $# = 1 ]]; then
-  readonly EXTRA="-c /usr/local/rpm-specs/"${1}"/prepare.sh"
+echo . /usr/local/rpm-specs/setup_env.review.sh
+
+if [[ $# = 1 ]]
+then
+  EXTRA="'. /usr/local/rpm-specs/setup_env.review.sh /usr/local/rpm-specs/$1'"
+else
+  EXTRA=bash
 fi
 
-docker run --cap-add=SYS_ADMIN -it -v "$n":/usr/local/rpm-specs fedora:rawhide bash $EXTRA
+eval docker run --cap-add=SYS_ADMIN \
+  -it -v "$n":/usr/local/rpm-specs \
+  fedora:24 \
+  bash -c $EXTRA
+
+  # Both fc25 and rawhide would come with mock 1.4+ which would break inside
+  # Docker?!
+  # fedora:latest \
+  # fedora:rawhide \
+
+# vim:et:sw=2:sts=2:ts=2
