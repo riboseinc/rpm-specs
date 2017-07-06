@@ -1,0 +1,19 @@
+#!/bin/bash
+spec_dir=$(cd $(dirname $0); pwd)
+echo . /usr/local/rpm-specs/setup_env.fedrepo.sh
+
+if [[ $# = 2 ]]
+then
+  EXTRA="'. /usr/local/rpm-specs/setup_env.fedrepo.sh $1 $2'"
+else
+  EXTRA=bash
+fi
+
+eval docker run --cap-add=SYS_ADMIN -it \
+  -v "${HOME}/.ssh":/usr/local/.ssh \
+  -v "${spec_dir}":/usr/local/rpm-specs \
+  -v "$(cd $(dirname $0)/../fedrepo_req; pwd)":/usr/local/fedrepo_req \
+  fedora:rawhide \
+  bash -c $EXTRA
+
+# vim:et:sw=2:sts=2:ts=2

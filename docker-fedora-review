@@ -1,5 +1,5 @@
 #!/bin/bash
-n=$(cd $(dirname $0); pwd)
+spec_dir=$(cd $(dirname $0); pwd)
 
 echo . /usr/local/rpm-specs/setup_env.review.sh
 
@@ -10,8 +10,9 @@ else
   EXTRA=bash
 fi
 
-eval docker run --cap-add=SYS_ADMIN \
-  -it -v "$n":/usr/local/rpm-specs \
+eval docker run --cap-add=SYS_ADMIN -it \
+  -v "${spec_dir}":/usr/local/rpm-specs \
+  -v "$(cd $(dirname $0)/../fedrepo_req; pwd)":/usr/local/fedrepo_req \
   fedora:24 \
   bash -c $EXTRA
 

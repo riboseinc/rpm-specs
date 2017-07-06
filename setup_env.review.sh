@@ -1,16 +1,17 @@
 #!/bin/bash -x
 
-install_review_packages() {
-  dnf -y install yum-utils fedora-review fedora-packager sudo
+install_packages() {
+  dnf -y install yum-utils fedora-review sudo
 }
 
-install_review_packages
+install_packages
 
 # echo root | passwd root --stdin # For debugging purposes
 useradd reviewer -p reviewer
 usermod -a -G mock reviewer
 
 echo
+echo -e "# \e[1mfedora-review\e[m"
 echo -e "# Run: \e[1mfedora-review\e[m -b <bug number>"
 echo -e "#  or: \e[1mfedora-review\e[m -n ${1##*/}"
 echo
