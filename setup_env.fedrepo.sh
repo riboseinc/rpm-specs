@@ -14,7 +14,7 @@ usage() {
   echo -e "\e[1m"
   echo -e "su - packager"
   echo -e ". /usr/local/setup.sh"
-  echo -e "fedpkg --user ${faslogin} clone ${package_name-package_name}"
+  echo -e "fedpkg --user ${faslogin-\$faslogin} clone ${package_name-\$package_name}"
   cat > /usr/local/setup.sh <<EOF
 export PS1='[\u@\h \W\$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")]\$ '
 cp /usr/local/.gitconfig ~
