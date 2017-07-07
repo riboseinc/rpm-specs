@@ -1,17 +1,18 @@
 #!/bin/bash
-spec_dir=$(cd $(dirname $0); pwd)
+rpm_specs_dir=$(cd $(dirname $0); pwd)
 
 echo . /usr/local/rpm-specs/setup_env.review.sh
 
 if [[ $# = 1 ]]
 then
-  EXTRA="'. /usr/local/rpm-specs/setup_env.review.sh /usr/local/rpm-specs/$1'"
+  readonly package_name="${1}"
+  EXTRA="'. /usr/local/rpm-specs/setup_env.review.sh /usr/local/rpm-specs/${package_name}'"
 else
   EXTRA=bash
 fi
 
 eval docker run --cap-add=SYS_ADMIN -it \
-  -v "${spec_dir}":/usr/local/rpm-specs \
+  -v "${rpm_specs_dir}":/usr/local/rpm-specs \
   -v "$(cd $(dirname $0)/../fedrepo_req; pwd)":/usr/local/fedrepo_req \
   fedora:24 \
   bash -c $EXTRA
