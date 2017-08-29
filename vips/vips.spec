@@ -20,8 +20,10 @@
 %global with_doc     0
 %endif
 
+%global epoch_n 2
+
 Name:		vips
-Epoch:	2
+Epoch:	%{epoch_n}
 Version:	%{vips_version}
 Release:	1%{?dist}
 Summary:	C/C++ library for processing large images
@@ -78,7 +80,7 @@ against VIPS.
 Summary:	Development files for %{name}
 Group:		Development/Libraries
 Requires:	libjpeg-devel%{?_isa} libtiff-devel%{?_isa} zlib-devel%{?_isa}
-Requires:	vips%{?_isa} = %{version}-%{release}
+Requires:	vips%{?_isa} = %{epoch_n}:%{version}-%{release}
 
 %description devel
 The %{name}-devel package contains the header files and
@@ -89,7 +91,7 @@ contains a C++ API and development documentation.
 %package tools
 Summary:	Command-line tools for %{name}
 Group:		Applications/Multimedia
-Requires:	vips%{?_isa} = %{version}-%{release}
+Requires:	vips%{?_isa} = %{epoch_n}:%{version}-%{release}
 
 %description tools
 The %{name}-tools package contains command-line tools for working with VIPS.
@@ -100,9 +102,9 @@ The %{name}-tools package contains command-line tools for working with VIPS.
 Summary:	Python 2 support for %{name}
 Group:		Development/Languages
 BuildRequires: python2-devel
-Requires:	vips%{?_isa} = %{version}-%{release}
+Requires:	vips%{?_isa} = %{epoch_n}:%{version}-%{release}
 Requires:	pygobject3-base >= 3.12.0
-Provides:	python2-vipsCC = %{version}-%{release}
+Provides:	python2-vipsCC = %{epoch_n}:%{version}-%{release}
 %{?python_provide:%python_provide python2-vipsCC}
 
 %description python
@@ -115,7 +117,7 @@ The %{name}-python package contains Python 2 support for VIPS.
 Summary:	Python 3 support for %{name}
 Group:		Development/Languages
 BuildRequires: python3-devel
-Requires:	vips%{?_isa} = %{version}-%{release}
+Requires:	vips%{?_isa} = %{epoch_n}:%{version}-%{release}
 Requires:	python3-gobject >= 3.12.0
 # No provide for python3-vipsCC, since we only have the gi overrides
 
