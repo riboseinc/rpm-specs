@@ -1,5 +1,5 @@
 Name:          ruby-build
-Version:       20170523
+Version:       20171215
 Release:       1%{?dist}
 Group:         Applications/System
 Summary:       The ruby-build program for building Ruby instances.
@@ -43,6 +43,9 @@ PREFIX=%{buildroot}/%{_prefix} \
 %license %{_pkgdocdir}/LICENSE
 
 %changelog
+* Mon Jan 22 2018 Jeffrey Lau <jeffrey.lau@ribose.com> - 20171215
+- Bump version
+
 * Fri Jun 23 2017 Ronald Tse <ronald.tse@ribose.com> - 20170523
 - Initial commit
 
