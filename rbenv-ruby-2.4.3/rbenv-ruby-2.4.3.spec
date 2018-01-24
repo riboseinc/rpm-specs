@@ -16,7 +16,7 @@
 %global ruby_archive %{ruby_archive}-%{?milestone}%{?!milestone:%{?revision:r%{revision}}}
 %endif
 
-%global release 62
+%global release 1
 %{!?release_string:%global release_string %{?development_release:0.}%{release}%{?development_release:.%{development_release}}%{?dist}}
 
 %global rubies_path %{_datarootdir}/rubies
@@ -64,6 +64,9 @@ rbenv rehash
 #%license %{_pkgdocdir}/LICENSE
 
 %changelog
+* Wed Jan 24 2018 Jeffrey Lau <jeffrey.lau@ribose.com> - 2.4.3-1
+- Fix release string
+
 * Mon Jan 22 2018 Jeffrey Lau <jeffrey.lau@ribose.com> - 2.4.3
 - Initial commit
 
