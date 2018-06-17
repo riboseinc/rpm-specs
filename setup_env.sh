@@ -44,6 +44,7 @@ build_package() {
   rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
     {
       echo "rpmbuild failed." >&2;
+      [ $CI ] && exit 1
       if [ "$(launched_from)" != "bash" ]; then
         echo "Now yielding control to bash." >&2 && \
         exec bash
@@ -121,6 +122,7 @@ build_npm_package() {
   rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
     {
       echo "rpmbuild failed." >&2;
+      [ $CI ] && exit 1
       if [ "$(launched_from)" != "bash" ]; then
         echo "Now yielding control to bash." >&2 && \
           exec bash

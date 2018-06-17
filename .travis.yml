@@ -1,0 +1,44 @@
+sudo: required
+
+language: generic
+
+git:
+  depth: 1
+
+services:
+  - docker
+
+env:
+  - PACKAGE=botan2
+  - PACKAGE=aws-es-curl
+  - PACKAGE=botan2
+  - PACKAGE=checkpatch
+  - PACKAGE=elasticdump
+  - PACKAGE=erlang
+  - PACKAGE=erlang-exmpp
+  - PACKAGE=erlang-xmlrpc
+  - PACKAGE=json-c12
+  - PACKAGE=libgsf
+  - PACKAGE=mydumper
+  - PACKAGE=parallel
+  - PACKAGE=rbenv
+  - PACKAGE=rbenv-ruby-2.3.4
+  - PACKAGE=rbenv-ruby-2.4.3
+  - PACKAGE=rbenv-ruby-2.5.0
+  - PACKAGE=redis-dump
+  - PACKAGE=ruby
+  - PACKAGE=ruby-build
+  - PACKAGE=rutil
+  - PACKAGE=vips
+
+before_install:
+  - docker pull centos:7
+
+script:
+  - docker run
+      --env CI=true
+      --rm
+      --volume $PWD:/usr/local/rpm-specs
+      --workdir /usr/local/rpm-specs
+      centos:7 /usr/local/rpm-specs/${PACKAGE}/prepare.sh
+
