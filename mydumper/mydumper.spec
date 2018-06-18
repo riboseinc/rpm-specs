@@ -1,8 +1,8 @@
 # Original from https://github.com/remicollet/remirepo/blob/master/mydumper/mydumper.spec
 
 Name:           mydumper
-Version:        0.9.1
-Release:        2%{?dist}
+Version:        0.9.5
+Release:        1%{?dist}
 Summary:        A high-performance MySQL backup tool
 
 Group:          Applications/Databases
@@ -56,6 +56,9 @@ rm -f %{buildroot}%{_datadir}/doc/%{name}/html/.buildinfo
 
 
 %changelog
+* Sun Jun 18 2018 Ronald Tse <ronald.tse@ribose.com> - 0.9.5-1
+- Version bump to 0.9.5
+
 * Thu May 18 2016 Ronald Tse <ronald.tse@ribose.com> - 0.9.1-2
 - Works with CentOS 7.3 and includes docs
 
