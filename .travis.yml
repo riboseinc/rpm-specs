@@ -18,6 +18,7 @@ env:
   - PACKAGE=erlang-exmpp
   - PACKAGE=erlang-xmlrpc
   - PACKAGE=json-c12
+  - PACKAGE=json-c13
   - PACKAGE=libgsf
   - PACKAGE=mydumper
   - PACKAGE=parallel
