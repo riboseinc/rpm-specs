@@ -9,7 +9,6 @@ services:
   - docker
 
 env:
-  - PACKAGE=botan2
   - PACKAGE=aws-es-curl
   - PACKAGE=botan2
   - PACKAGE=checkpatch
@@ -25,6 +24,7 @@ env:
   - PACKAGE=rbenv-ruby-2.3.4
   - PACKAGE=rbenv-ruby-2.4.3
   - PACKAGE=rbenv-ruby-2.5.0
+  - PACKAGE=rbenv-ruby-2.5.1
   - PACKAGE=redis-dump
   - PACKAGE=ruby
   - PACKAGE=ruby-build
