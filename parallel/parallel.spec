@@ -1,6 +1,6 @@
 Summary:  	Shell tool for executing jobs in parallel
 Name: 	  	parallel
-Version:   	20170622
+Version:   	20180522
 Release:   	1
 License:   	GPL
 Group: 	  	Productivity/File utilities
@@ -53,6 +53,9 @@ often be used as a substitute for xargs or cat | bash.
 %{_mandir}/man7/*
 
 %changelog
+* Sun Jun 18 2018 Ronald Tse <ronald.tse@ribose.com> - 20180522-1.0
+- Upgrade to 20180522
+
 * Thu Jun 29 2017 Ronald Tse <ronald.tse@ribose.com> - 20170622-1.0
 - Upgrade to 20170622
 - Cleanup spec
