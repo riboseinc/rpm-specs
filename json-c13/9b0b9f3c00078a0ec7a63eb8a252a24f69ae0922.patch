@@ -1,0 +1,86 @@
+From 9b0b9f3c00078a0ec7a63eb8a252a24f69ae0922 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Mon, 3 Jul 2017 12:37:39 +0200
+Subject: [PATCH] Rename for json-c12 epel-compat
+
+---
+ Makefile.am                    | 10 +++++-----
+ configure.ac                   |  4 ++--
+ json-c.pc.in => json-c12.pc.in |  6 +++---
+ 3 files changed, 10 insertions(+), 10 deletions(-)
+ rename json-c.pc.in => json-c12.pc.in (65%)
+
+diff --git a/Makefile.am b/Makefile.am
+index e511a36..5bb385c 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -3,12 +3,12 @@ include Makefile.am.inc
+ EXTRA_DIST = README.html README-WIN32.html config.h.win32 doc json-c.vcproj
+ SUBDIRS = . tests
+ 
+-lib_LTLIBRARIES = libjson-c.la 
++lib_LTLIBRARIES = libjson-c12.la
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+-pkgconfig_DATA = json-c.pc
++pkgconfig_DATA = json-c12.pc
+ 
+-libjson_cincludedir = $(includedir)/json-c
++libjson_cincludedir = $(includedir)/json-c12
+ libjson_cinclude_HEADERS = \
+ 	arraylist.h \
+ 	bits.h \
+@@ -31,9 +31,9 @@ libjson_cinclude_HEADERS = \
+ #libjsonx_include_HEADERS = \
+ #	json_config.h
+ 
+-libjson_c_la_LDFLAGS = -version-info 2:2:0 -no-undefined @JSON_BSYMBOLIC_LDFLAGS@
++libjson_c12_la_LDFLAGS = -version-info 2:2:0 -no-undefined @JSON_BSYMBOLIC_LDFLAGS@
+ 
+-libjson_c_la_SOURCES = \
++libjson_c12_la_SOURCES = \
+ 	arraylist.c \
+ 	debug.c \
+ 	json_c_version.c \
+diff --git a/configure.ac b/configure.ac
+index 4c5af94..a138aca 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1,7 +1,7 @@
+ AC_PREREQ(2.52)
+ 
+ # Process this file with autoconf to produce a configure script.
+-AC_INIT([json-c], 0.12.1, [json-c@googlegroups.com])
++AC_INIT([json-c12], 0.12.1, [json-c@googlegroups.com])
+ 
+ AM_INIT_AUTOMAKE
+ 
+@@ -98,7 +98,7 @@ AC_SUBST(JSON_BSYMBOLIC_LDFLAGS)
+ 
+ AC_CONFIG_FILES([
+ Makefile
+-json-c.pc
++json-c12.pc
+ tests/Makefile
+ json-c-uninstalled.pc
+ ])
+diff --git a/json-c.pc.in b/json-c12.pc.in
+similarity index 65%
+rename from json-c.pc.in
+rename to json-c12.pc.in
+index 037739d..bdcafbc 100644
+--- a/json-c.pc.in
++++ b/json-c12.pc.in
+@@ -3,9 +3,9 @@ exec_prefix=@exec_prefix@
+ libdir=@libdir@
+ includedir=@includedir@
+ 
+-Name: json-c
++Name: json-c12
+ Description: JSON implementation in C
+ Version: @VERSION@
+ Requires: 
+-Libs:  -L${libdir} -ljson-c
+-Cflags: -I${includedir}/json-c
++Libs:  -L${libdir} -ljson-c12
++Cflags: -I${includedir}/json-c12
