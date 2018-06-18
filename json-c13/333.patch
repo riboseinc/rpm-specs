@@ -1,0 +1,22 @@
+From 4354964f137a66aab2dc3f397a4dee7ae7b57725 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Mon, 3 Jul 2017 12:17:36 +0200
+Subject: [PATCH] Replace obsolete AC_PROG_LIBTOOL
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 364d27d..bca7593 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -87,7 +87,7 @@ int main(int c,char* v) {return 0;}
+ 
+ AC_LANG_POP([C])
+ 
+-AM_PROG_LIBTOOL
++LT_INIT
+ 
+ # Check for the -Bsymbolic-functions linker flag
+ AC_ARG_ENABLE([Bsymbolic],
