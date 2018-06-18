@@ -43,7 +43,7 @@ Installs %{name}
 
 %build
 . /etc/profile.d/rbenv.sh
-rbenv install 2.4.3
+rbenv install %{ruby_version}
 
 %install
 %{__mkdir} -p %{buildroot}/%{rubies_path}/versions
