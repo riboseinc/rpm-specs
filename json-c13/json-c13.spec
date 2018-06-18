@@ -92,7 +92,6 @@ done
 
 %{__mkdir} -p %{buildroot}/%{_pkgdocdir}
 %{__cp} -pr doc/html ChangeLog README README.* %{buildroot}/%{_pkgdocdir}
-%{_sbindir}/hardlink -cv %{buildroot}/%{_pkgdocdir}
 
 
 %check
