@@ -1,0 +1,50 @@
+= Ribose RPM Specs
+
+image:https://img.shields.io/travis/riboseinc/rpm-specs/master.svg[Build Status (Travis CI), link=https://travis-ci.org/riboseinc/rpm-specs]
+
+== Building RPMSs
+
+[source,sh]
+----
+./docker.sh $pkgname
+----
+
+== Running the container and building manually
+
+Enter the container:
+
+[source,sh]
+----
+./docker.sh
+----
+
+In container:
+
+[source,sh]
+----
+cd /usr/local/rpm-specs/$pkgname
+./prepare.sh
+----
+
+Then all the RPMs will be available under `/root/rpmbuild/{RPMS,SRPMS}`.
+
+
+== Automatically building and attempting install
+
+Append the following to your desired `$pkgname/prepare.sh` script:
+
+[source,sh]
+----
+yum install -y /root/rpmbuild/RPMS/x86_64/*.rpm
+exec bash
+----
+
+Then run:
+
+[source,sh]
+----
+./docker.sh $pkgname
+----
+
+And you'll be dropped into a `bash` session once building / installing is
+complete.
