@@ -1,19 +1,19 @@
 Summary: GNOME Structured File library
 Epoch: 3
 Name: libgsf
-Version: 1.14.41
+Version: 1.14.43
 Release: 1%{?dist}
 Group: System Environment/Libraries
 License: LGPLv2
-Source: ftp://ftp.gnome.org/pub/GNOME/sources/%{name}/1.14/%{name}-%{version}.tar.xz
+Source: https://ftp.gnome.org/pub/gnome/sources/%{name}/1.14/%{name}-%{version}.tar.xz
 # Source: https://github.com/GNOME/%{name}/archive/LIBGSF_1_14_41.tar.gz
 URL: http://www.gnome.org/projects/libgsf/
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: glib2-devel, perl-XML-Parser
 BuildRequires: libtool, libxml2-devel, glib2-devel, bzip2-devel, gettext
 BuildRequires: libbonobo-devel, pygtk2-devel, intltool, gnome-vfs2-devel
-Obsoletes: libgsf-gnome < 1.14.41
-Obsoletes: libgsf-python < 1.14.41
+Obsoletes: libgsf-gnome < %{version}
+Obsoletes: libgsf-python < %{version}
 
 %description
 A library for reading and writing structured files (e.g. MS OLE and Zip)
@@ -23,7 +23,7 @@ Summary: Support files necessary to compile applications with libgsf
 Group: Development/Libraries
 Requires: glib2-devel, libxml2-devel
 Requires: pkgconfig
-Obsoletes: libgsf-gnome-devel < 1.14.41
+Obsoletes: libgsf-gnome-devel < %{version}
 
 %description devel
 Libraries, headers, and support files necessary to compile applications using
@@ -75,6 +75,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Jun 18 2018 Ronald Tse <ronald.tse@ribose.com> - 1.14.43-1
+- Update to 1.14.43
+
 * Thu May 18 2017 Ronald Tse <ronald.tse@ribose.com> - 1.14.41-1
 - Update to 1.14.41
 
@@ -206,7 +209,7 @@ rm -rf $RPM_BUILD_ROOT
 - latest version
 
 * Tue Sep 23 2008 Matthias Clasen  <mclasen@redhat.com> - 1.14.9-2
-- Drop the ImageMagick dependency again, since it causes size problems on 
+- Drop the ImageMagick dependency again, since it causes size problems on
   the live cd
 
 * Wed Sep 03 2008 Caolán McNamara <caolanm@redhat.com> 1.14.9-1
