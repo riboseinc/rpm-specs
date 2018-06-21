@@ -34,7 +34,7 @@ URL:           http://ruby-lang.org/
 BuildRequires: redhat-rpm-config ruby-build rbenv
 
 # For running rubies
-Requires: openssl libyaml
+Requires: openssl libyaml rbenv
 
 %description
 Installs %{name}
