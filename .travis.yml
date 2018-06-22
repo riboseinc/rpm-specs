@@ -27,6 +27,7 @@ env:
   - PACKAGE=rbenv-ruby-2.5.0
   - PACKAGE=rbenv-ruby-2.5.1
   - PACKAGE=redis-dump
+  - PACKAGE=rnp
   - PACKAGE=ruby-build
   - PACKAGE=rutil
   - PACKAGE=vips
