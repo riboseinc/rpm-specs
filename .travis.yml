@@ -27,6 +27,7 @@ env:
   - PACKAGE=rbenv-ruby-2.5.0
   - PACKAGE=rbenv-ruby-2.5.1
   - PACKAGE=redis-dump
+  - PACKAGE=rnp
   - PACKAGE=ruby-build
   - PACKAGE=rutil
   - PACKAGE=vips
@@ -39,6 +40,6 @@ script:
       --env CI=true
       --rm
       --volume $PWD:/usr/local/rpm-specs
-      --workdir /usr/local/rpm-specs
-      centos:7 /usr/local/rpm-specs/${PACKAGE}/prepare.sh
+      --workdir /usr/local/rpm-specs/${PACKAGE}
+      centos:7 ./prepare.sh
 
