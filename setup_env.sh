@@ -18,7 +18,7 @@ install_base_packages() {
 }
 
 install_npm_packages() {
-  yum install -y https://rpm.nodesource.com/pub_6.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm
+  curl -sL https://rpm.nodesource.com/setup_10.x | bash -
   yum install -y nodejs
   npm install --global speculate
 }
@@ -68,6 +68,11 @@ modify_spec() {
   # XXX: somehow speculate makes all executables un-executable
   replace_string="/defattr/d"
   sed -i "${replace_string}" ${spec_dest}
+
+  # speculate expects all packages to have a systemd service, but ours don't so
+  # we disable the line of `systemctl enable ...`.
+  replace_string="/systemctl/d"
+  sed -i "${replace_string}" ${spec_dest}
 }
 
 # XXX: these lines are used to create /usr/bin/{exec} links, speculate doesn't create them
@@ -100,6 +105,10 @@ build_npm_package() {
 
   pushd /usr/lib/node_modules/${package_name}
   speculate
+
+  # Somehow speculate creates unnecessary service files for even non-services.
+  # Since our packages don't have services we delete them here.
+  rm -f *.service
   popd
 
   yes | cp -f ${sources_source} ~/rpmbuild/SOURCES
