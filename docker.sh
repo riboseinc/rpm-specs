@@ -16,26 +16,28 @@
 # ... then the ./docker.sh will have key1=hello and key2=bye.
 #
 #
-absolute_dir_name=$(cd $(dirname $0); pwd)
+absolute_rpm_spec_dir=$(cd "$(dirname "$0")"/.. 2>/dev/null 1>&2 || exit 1; pwd)
+package_name="${absolute_rpm_spec_dir##*/}"
 
 if [[ $# = 1 ]]; then
-  readonly EXTRA="-c /usr/local/rpm-specs/"${1}"/prepare.sh"
+  readonly EXTRA="-c /usr/local/rpm-specs/${1}/prepare.sh"
 fi
 
 # Parse out env var names intended for passing into container:
 envs=()
-if [[ ! -z "${ENVS}" ]]; then
+if [[ ! -z "${ENVS:-}" ]]; then
   IFS=, read -r -a envs <<< "${ENVS}"
 fi
 
 # Compose envs strings for `docker run`:
 docker_env_opts=''
-for env_key in ${envs[@]}; do
+for env_key in "${envs[@]}"; do
   docker_env_opts="${docker_env_opts} -e ${env_key}"
 done
 
 docker run -it \
-  -v "${absolute_dir_name}":/usr/local/rpm-specs \
+  -v "${absolute_rpm_spec_dir}"/common:/usr/local/rpm-specs \
+  -v "${absolute_rpm_spec_dir}":/usr/local/rpm-specs/"${package_name}" \
   ${docker_env_opts} \
   centos:7 \
   bash $EXTRA
