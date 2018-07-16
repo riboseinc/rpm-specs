@@ -18,7 +18,8 @@
 #
 absolute_rpm_spec_dir=$(cd "$(dirname "$0")"/.. 2>/dev/null 1>&2 || exit 1; pwd)
 
-if [[ $# = 1 && ${1} = 'package' ]]; then
+# if [[ $# = 1 && ${1} = 'package' ]]; then
+if [[ $# = 1 ]]; then
   readonly EXTRA="-c /usr/local/rpm-specs/package/prepare.sh"
 fi
 
