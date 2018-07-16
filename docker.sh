@@ -17,10 +17,9 @@
 #
 #
 absolute_rpm_spec_dir=$(cd "$(dirname "$0")"/.. 2>/dev/null 1>&2 || exit 1; pwd)
-package_name="${absolute_rpm_spec_dir##*/}"
 
-if [[ $# = 1 ]]; then
-  readonly EXTRA="-c /usr/local/rpm-specs/${1}/prepare.sh"
+if [[ $# = 1 && ${1} = 'package' ]]; then
+  readonly EXTRA="-c /usr/local/rpm-specs/package/prepare.sh"
 fi
 
 # Parse out env var names intended for passing into container:
@@ -36,8 +35,9 @@ for env_key in "${envs[@]}"; do
 done
 
 docker run -it \
+  -v "${absolute_rpm_spec_dir}":/usr/local/rpm-specs/package \
   -v "${absolute_rpm_spec_dir}"/common:/usr/local/rpm-specs \
-  -v "${absolute_rpm_spec_dir}":/usr/local/rpm-specs/"${package_name}" \
+  --workdir /usr/local/rpm-specs/package \
   ${docker_env_opts} \
   centos:7 \
   bash $EXTRA
