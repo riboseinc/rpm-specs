@@ -39,6 +39,7 @@ script:
   - docker run
       --env CI=true
       --rm
-      --volume $PWD:/usr/local/rpm-specs
+      --volume $PWD/common:/usr/local/rpm-specs
+      --volume $PWD:/usr/local/rpm-specs/${PACKAGE}
       --workdir /usr/local/rpm-specs/${PACKAGE}
       centos:7 ./prepare.sh
