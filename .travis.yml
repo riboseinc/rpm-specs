@@ -8,30 +8,6 @@ git:
 services:
   - docker
 
-env:
-  - PACKAGE=aws-es-curl
-  - PACKAGE=botan2
-  - PACKAGE=checkpatch
-  - PACKAGE=elasticdump
-  - PACKAGE=erlang
-  - PACKAGE=erlang-exmpp
-  - PACKAGE=erlang-xmlrpc
-  - PACKAGE=json-c12
-  - PACKAGE=json-c13
-  - PACKAGE=libgsf
-  - PACKAGE=mydumper
-  - PACKAGE=parallel
-  - PACKAGE=rbenv
-  - PACKAGE=rbenv-ruby-2.3.4
-  - PACKAGE=rbenv-ruby-2.4.3
-  - PACKAGE=rbenv-ruby-2.5.0
-  - PACKAGE=rbenv-ruby-2.5.1
-  - PACKAGE=redis-dump
-  - PACKAGE=rnp
-  - PACKAGE=ruby-build
-  - PACKAGE=rutil
-  - PACKAGE=vips
-
 before_install:
   - docker pull centos:7
 
@@ -39,6 +15,7 @@ script:
   - docker run
       --env CI=true
       --rm
-      --volume $PWD:/usr/local/rpm-specs
-      --workdir /usr/local/rpm-specs/${PACKAGE}
+      --volume $PWD/common:/usr/local/rpm-specs
+      --volume $PWD:/usr/local/rpm-specs/package
+      --workdir /usr/local/rpm-specs/package
       centos:7 ./prepare.sh
