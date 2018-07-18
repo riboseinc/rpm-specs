@@ -2,16 +2,35 @@
 
 image:https://img.shields.io/travis/riboseinc/rpm-specs/master.svg[Build Status (Travis CI), link=https://travis-ci.org/riboseinc/rpm-specs]
 
+== Introduction
+
+This repo is meant to live as a submodule within individual `rpm-spec-*` repos.
+
+_E.g._,
+
+* https://github.com/riboseinc/rpm-spec-rnp[`rpm-spec-rnp`]
+
 == Building RPMSs
+
+Assuming you have cloned one of the `rpm-spec-*` repos, e.g. `rpm-spec-rnp`:
+
+[source,console]
+----
+$ git clone https://github.com/riboseinc/rpm-spec-rnp
+$ cd rpm-spec-rnp
+----
 
 [source,sh]
 ----
-./docker.sh $pkgname
+./docker.sh package
 ----
+
+[NOTE]
+The first argument `package` can actually be anything.
 
 == Running the container and building manually
 
-Enter the container:
+Enter the container by not specifying any arguments:
 
 [source,sh]
 ----
@@ -22,7 +41,7 @@ In container:
 
 [source,sh]
 ----
-cd /usr/local/rpm-specs/$pkgname
+cd /usr/local/rpm-specs/package
 ./prepare.sh
 ----
 
@@ -31,7 +50,7 @@ Then all the RPMs will be available under `/root/rpmbuild/{RPMS,SRPMS}`.
 
 == Automatically building and attempting install
 
-Append the following to your desired `$pkgname/prepare.sh` script:
+Append the following to your desired `prepare.sh` script:
 
 [source,sh]
 ----
@@ -43,7 +62,7 @@ Then run:
 
 [source,sh]
 ----
-./docker.sh $pkgname
+./docker.sh package
 ----
 
 And you'll be dropped into a `bash` session once building / installing is
