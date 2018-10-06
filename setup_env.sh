@@ -8,7 +8,7 @@ install_base_packages() {
 
   # jq is needed for building npm packages, to read the 'bins' from package.json
   yum install -y automake autoconf libtool make gcc-c++ gettext python2-devel \
-    rpmdevtools git epel-rpm-macros jq cmake3
+    rpmdevtools git epel-rpm-macros jq cmake3 yum-utils
 
   # Ensure all packages provide for "el7" not just "el7.centos"
   sed -i 's/el7.centos/el7/' /etc/rpm/macros.dist
@@ -41,6 +41,7 @@ build_package() {
   fi
 
   spectool -g -R ${spec_dest}
+  yum-builddep -y ${spec_dest}
   rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
     {
       echo "rpmbuild failed." >&2;
