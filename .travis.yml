@@ -11,11 +11,16 @@ services:
 before_install:
   - docker pull centos:7
 
+env:
+  global:
+    - PACKAGE=parallel
+
 script:
+  - git clone --depth 1 https://github.com/riboseinc/rpm-spec-$PACKAGE $PACKAGE
   - docker run
       --env CI=true
       --rm
-      --volume $PWD/common:/usr/local/rpm-specs
-      --volume $PWD:/usr/local/rpm-specs/package
-      --workdir /usr/local/rpm-specs/package
+      --volume $PWD:/usr/local/rpm-specs
+      --workdir /usr/local/rpm-specs/$PACKAGE
       centos:7 ./prepare.sh
+
