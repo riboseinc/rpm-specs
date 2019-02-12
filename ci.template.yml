@@ -39,11 +39,6 @@ build:
     # make sure our artifacts are uploaded
     mv ~/rpmbuild/RPMS "$CI_PROJECT_DIR"
 
-test:
-  stage: test
-  script: |
-    echo No tests for this package.
-
 .deploy:
   only:
     - master
