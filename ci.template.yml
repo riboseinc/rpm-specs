@@ -9,6 +9,7 @@ image:
 stages:
   - build
   - test
+  - sign
   - deploy
 
 variables:
@@ -42,6 +43,47 @@ build:
 .deploy:
   only:
     - master
+
+sign:
+  artifacts:
+    name: RPMS
+    expire_in: 30 days
+    paths:
+      - RPMS/
+  extends: .deploy
+  stage: sign
+  script: |
+    yum -y install rpmdevtools rpm-sign expect
+
+    export private_key_path="$(mktemp --tmpdir XXXX.packager-private.gpg)"
+    # Note that we're avoiding exposing the key in the job log here.
+    # Another option would be to use python os.getenv+base64.b64decode,
+    # since it's aleady installed at this point.
+    #
+    # Be cautious and do testing if changing this line (even if job logs are private)
+    bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > $private_key_path'
+
+    packager="$(gpg --list-packets $private_key_path | grep user.ID | sed -Ee 's/^.*packet: "(.*)"$/\1/')"
+    gpg --import "$private_key_path"
+    for pkg in RPMS/**/*.rpm; do
+      expect <<EOF
+        spawn rpm --addsign --define "%_gpg_name $packager" "$pkg"
+        expect -ex        "Enter pass phrase: "
+        send -- "\r"
+        expect eof
+    EOF
+      # verification should fail since we haven't imported the public key
+      ! rpmdev-checksig "$pkg"
+      ! rpm --checksig "$pkg"
+      # export + import to the rpm db
+      public_key_path="$(mktemp --tmpdir XXXX.packager-public.gpg)"
+      gpg --export --armor "$packager" > "$public_key_path"
+      rpm --import "$public_key_path"
+      # verification should succeed at this point
+      # rpmdev-checksig will fail if no signature is present (so it's a good additional check)
+      rpmdev-checksig "$pkg"
+      rpm --checksig "$pkg"
+    done
 
 github-release:
   extends: .deploy
