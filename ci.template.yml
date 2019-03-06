@@ -63,7 +63,7 @@ sign:
     # Be cautious and do testing if changing this line (even if job logs are private)
     bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > $private_key_path'
 
-    packager="$(gpg --list-packets $private_key_path  | grep user.ID | sed -Ee 's/^.*packet: "(.*)"$/\1/')"
+    packager="$(gpg --list-packets $private_key_path | grep user.ID | sed -Ee 's/^.*packet: "(.*)"$/\1/')"
     gpg --import "$private_key_path"
     for pkg in RPMS/**/*.rpm; do
       expect <<EOF
