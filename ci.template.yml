@@ -25,6 +25,16 @@ before_script:
     set -euxo pipefail
     eval export PROJECT_NAME="$(eval $PROJECT_NAME)"
     yum -y -q install git
+    # write our protected keys to files
+    if [[ -v PACKAGE_SIGNING_KEY_BASE64 ]]; then
+      export SIGNING_KEY_PATH="$(mktemp --tmpdir signing-key.gpg.XXXX)"
+      # Note that we're avoiding exposing the keys in the job log here.
+      # Another option would be to use python os.getenv+base64.b64decode,
+      # since it's aleady installed at this point.
+      #
+      # Be cautious and do testing if changing these lines (even if job logs are private)
+      bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > '"$SIGNING_KEY_PATH"
+    fi
 
 build:
   stage: build
@@ -66,15 +76,7 @@ sign:
   script: |
     yum -y install rpmdevtools rpm-sign expect
 
-    export private_key_path="$(mktemp --tmpdir XXXX.packager-private.gpg)"
-    # Note that we're avoiding exposing the key in the job log here.
-    # Another option would be to use python os.getenv+base64.b64decode,
-    # since it's aleady installed at this point.
-    #
-    # Be cautious and do testing if changing this line (even if job logs are private)
-    bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > $private_key_path'
-
-    gpg --import "$private_key_path"
+    gpg --import "$SIGNING_KEY_PATH"
     for pkg in RPMS/**/*.rpm SRPMS/*.src.rpm; do
       expect <<EOF
         spawn rpm --addsign --define "%_gpg_name $PACKAGER" "$pkg"
@@ -86,7 +88,7 @@ sign:
       ! rpmdev-checksig "$pkg"
       ! rpm --checksig "$pkg"
       # export + import to the rpm db
-      public_key_path="$(mktemp --tmpdir XXXX.packager-public.gpg)"
+      public_key_path="$(mktemp --tmpdir signing-key-pub.gpg.XXXX)"
       gpg --export --armor "$PACKAGER" > "$public_key_path"
       rpm --import "$public_key_path"
       # verification should succeed at this point
