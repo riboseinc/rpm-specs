@@ -26,10 +26,11 @@ before_script:
 build:
   stage: build
   artifacts:
-    name: RPMS
+    name: rpmbuild
     expire_in: 30 days
     paths:
       - RPMS/
+      - SRPMS/
   script: |
     git clone --depth 1 https://github.com/riboseinc/rpm-specs /usr/local/rpm-specs
     ln -s "$CI_PROJECT_DIR" "/usr/local/rpm-specs/$PROJECT_NAME"
@@ -37,8 +38,11 @@ build:
     ./prepare.sh
     # just for informational purposes
     for file in ~/rpmbuild/RPMS/**/*.rpm; do echo "$file"; rpm -qlpv "$file"; echo; done
+    # don't try to process SRPMs larger than 100MiB (publishing to github would fail anyways)
+    find ~/rpmbuild/SRPMS/ -type f -iname '*.src.rpm' -size +100M -delete
     # make sure our artifacts are uploaded
     mv ~/rpmbuild/RPMS "$CI_PROJECT_DIR"
+    mv ~/rpmbuild/SRPMS "$CI_PROJECT_DIR"
 
 .deploy:
   only:
@@ -46,10 +50,11 @@ build:
 
 sign:
   artifacts:
-    name: RPMS
+    name: rpmbuild
     expire_in: 30 days
     paths:
       - RPMS/
+      - SRPMS/
   extends: .deploy
   stage: sign
   script: |
@@ -65,7 +70,7 @@ sign:
 
     packager="$(gpg --list-packets $private_key_path | grep user.ID | sed -Ee 's/^.*packet: "(.*)"$/\1/')"
     gpg --import "$private_key_path"
-    for pkg in RPMS/**/*.rpm; do
+    for pkg in RPMS/**/*.rpm SRPMS/*.src.rpm; do
       expect <<EOF
         spawn rpm --addsign --define "%_gpg_name $packager" "$pkg"
         expect -ex        "Enter pass phrase: "
@@ -107,5 +112,6 @@ github-release:
       "$pkgver" \
       --name "$PROJECT_NAME $pkgver" \
       --release-notes "Automatically built in commit $(echo $CI_COMMIT_SHA | cut -c 1-8)." \
-      "$CI_PROJECT_DIR"/RPMS/**/*.rpm
+      "$CI_PROJECT_DIR"/RPMS/**/*.rpm \
+      "$CI_PROJECT_DIR"/SRPMS/*.src.rpm
 
