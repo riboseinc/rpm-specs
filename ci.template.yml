@@ -16,6 +16,9 @@ variables:
   PROJECT_NAME: echo $$CI_PROJECT_NAME | cut -c 10-
   # just pick the first one by default
   PRIMARY_RPM: find RPMS/ -name '*.rpm' -print -quit
+  # This is used to fill in the PACKAGER tag in the packages and must also
+  # match the userid for the signing key
+  PACKAGER: Ribose Packaging <packages@ribose.com>
 
 before_script:
   - |
@@ -35,6 +38,9 @@ build:
     git clone --depth 1 https://github.com/riboseinc/rpm-specs /usr/local/rpm-specs
     ln -s "$CI_PROJECT_DIR" "/usr/local/rpm-specs/$PROJECT_NAME"
     cd "/usr/local/rpm-specs/$PROJECT_NAME"
+    # set some macros
+    echo %packager $PACKAGER > ~/.rpmmacros
+    # build the package
     ./prepare.sh
     # just for informational purposes
     for file in ~/rpmbuild/RPMS/**/*.rpm; do echo "$file"; rpm -qlpv "$file"; echo; done
@@ -68,11 +74,10 @@ sign:
     # Be cautious and do testing if changing this line (even if job logs are private)
     bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > $private_key_path'
 
-    packager="$(gpg --list-packets $private_key_path | grep user.ID | sed -Ee 's/^.*packet: "(.*)"$/\1/')"
     gpg --import "$private_key_path"
     for pkg in RPMS/**/*.rpm SRPMS/*.src.rpm; do
       expect <<EOF
-        spawn rpm --addsign --define "%_gpg_name $packager" "$pkg"
+        spawn rpm --addsign --define "%_gpg_name $PACKAGER" "$pkg"
         expect -ex        "Enter pass phrase: "
         send -- "\r"
         expect eof
@@ -82,7 +87,7 @@ sign:
       ! rpm --checksig "$pkg"
       # export + import to the rpm db
       public_key_path="$(mktemp --tmpdir XXXX.packager-public.gpg)"
-      gpg --export --armor "$packager" > "$public_key_path"
+      gpg --export --armor "$PACKAGER" > "$public_key_path"
       rpm --import "$public_key_path"
       # verification should succeed at this point
       # rpmdev-checksig will fail if no signature is present (so it's a good additional check)
