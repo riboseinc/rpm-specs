@@ -28,12 +28,14 @@ before_script:
     # write our protected keys to files
     if [[ -v PACKAGE_SIGNING_KEY_BASE64 ]]; then
       export SIGNING_KEY_PATH="$(mktemp --tmpdir signing-key.gpg.XXXX)"
+      export DEPLOY_KEY_PATH="$(mktemp --tmpdir deploy-key.XXXX)"
       # Note that we're avoiding exposing the keys in the job log here.
       # Another option would be to use python os.getenv+base64.b64decode,
       # since it's aleady installed at this point.
       #
       # Be cautious and do testing if changing these lines (even if job logs are private)
       bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > '"$SIGNING_KEY_PATH"
+      bash -ceuo pipefail 'echo $GITHUB_YUM_DEPLOY_KEY_BASE64 | base64 -d > '"$DEPLOY_KEY_PATH"
     fi
 
 build:
@@ -121,4 +123,64 @@ github-release:
       --release-notes "Automatically built in commit $(echo $CI_COMMIT_SHA | cut -c 1-8)." \
       "$CI_PROJECT_DIR"/RPMS/**/*.rpm \
       "$CI_PROJECT_DIR"/SRPMS/*.src.rpm
+
+update-repo:
+  extends: .deploy
+  stage: deploy
+  cache:
+    key: repo-cache
+    paths:
+      - yum
+  script: |
+    yum -y install createrepo rsync
+
+    # set up ssh auth
+    mkdir ~/.ssh
+    eval `ssh-agent`
+    ssh-add "$DEPLOY_KEY_PATH"
+    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+    # Update or clone the yum repo.
+    # Note that the "yum" directory will always exist,
+    # because it is listed as a path in the cache above.
+    if [ -d yum/.git ]; then
+      pushd yum
+      git clean -qdffx
+      git fetch
+      git checkout master
+      git reset --hard origin/master
+      popd
+    else
+      git clone --depth 1 git@github.com:riboseinc/yum yum
+    fi
+
+    gpg --import "$SIGNING_KEY_PATH"
+
+    # copy our new packages to the github repo
+    rsync -a --ignore-existing RPMS SRPMS yum
+    cd yum
+    # check and update each package repo
+    for dir in RPMS/* SRPMS; do
+      pushd "$dir"
+      # generally we shouldn't be modifying existing package files
+      # (instead, we should be adding new ones)
+      git diff --quiet . || false
+      # see if we have new package files here
+      if [[ -n "$(git status -s .)" ]]; then
+        # update the repo
+        createrepo --update .
+        # sign upated repodata
+        rm -f repodata/repomd.xml.asc
+        gpg --sign --armor repodata/repomd.xml
+        # add the changes
+        git add -A .
+      fi
+      popd
+    done
+
+    git config --global user.name "Ribose Packaging"
+    git config --global user.email "packages@ribose.com"
+    git commit -m "${PROJECT_NAME}: Update RPMs and repodata"
+    git pull --rebase
+    git push
 
