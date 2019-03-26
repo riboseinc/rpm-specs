@@ -14,8 +14,8 @@ stages:
 
 variables:
   PROJECT_NAME: echo $$CI_PROJECT_NAME | cut -c 10-
-  # just pick the first one by default
-  PRIMARY_RPM: find RPMS/ -name '*.rpm' -print -quit
+  # just pick any by default
+  PRIMARY_RPM: "*.rpm"
   # This is used to fill in the PACKAGER tag in the packages and must also
   # match the userid for the signing key
   PACKAGER: Ribose Packaging <packages@ribose.com>
@@ -124,7 +124,8 @@ github-release:
   extends: .deploy
   stage: deploy
   script: |
-    pkgver=$(rpm -qp --queryformat '%{VERSION}-%{RELEASE}' $(eval $PRIMARY_RPM))
+    primary_rpm=$(find RPMS/ -name "$PRIMARY_RPM" -print -quit)
+    pkgver=$(rpm -qp --queryformat '%{VERSION}-%{RELEASE}' "$primary_rpm")
     # we need a newish ruby for create-github-release.rb
     yum -y -q install centos-release-scl
     yum -y -q install rh-ruby25
