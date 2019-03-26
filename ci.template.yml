@@ -80,8 +80,7 @@ build:
     # don't try to process SRPMs larger than 100MiB (publishing to github would fail anyways)
     find ~/rpmbuild/SRPMS/ -type f -iname '*.src.rpm' -size +100M -delete
     # make sure our artifacts are uploaded
-    mv ~/rpmbuild/RPMS "$CI_PROJECT_DIR"
-    mv ~/rpmbuild/SRPMS "$CI_PROJECT_DIR"
+    mv ~/rpmbuild/{RPMS,SRPMS} "$CI_PROJECT_DIR"
 
 .deploy:
   only:
