@@ -50,6 +50,27 @@ build:
     git clone --depth 1 https://github.com/riboseinc/rpm-specs /usr/local/rpm-specs
     ln -s "$CI_PROJECT_DIR" "/usr/local/rpm-specs/$PROJECT_NAME"
     cd "/usr/local/rpm-specs/$PROJECT_NAME"
+    # first, check if we have already published this package to the yum repo
+    commit_url="https://raw.githubusercontent.com/riboseinc/yum/master/commits/${PROJECT_NAME}"
+    if curl -sfI "$commit_url"; then
+      yum_repo_commit=$(curl -sf "$commit_url")
+      rpm_spec_commit=$CI_COMMIT_SHA
+      if [ "$yum_repo_commit" == "$rpm_spec_commit" ]; then
+        echo Package already published. Aborting.
+        exit 1
+      fi
+      # check if the spec commit is newer than the one recorded in the yum repo
+      set +e
+      git merge-base --is-ancestor "$yum_repo_commit" "$rpm_spec_commit"
+      rv=$?
+      set -e
+      case $rv in
+        0) : ;;
+        1) echo "Package commit ${rpm_spec_commit} is not newer than ${yum_repo_commit}. Aborting."
+           exit 1 ;;
+        *) echo "Unable to compare commit ${yum_repo_commit} to ${rpm_spec_commit}. Continuing anyway." ;;
+      esac
+    fi
     # set some macros
     echo %packager $PACKAGER > ~/.rpmmacros
     # build the package
@@ -177,6 +198,8 @@ update-repo:
       fi
       popd
     done
+    echo "$CI_COMMIT_SHA" > "commits/$PROJECT_NAME"
+    git add "commits/$PROJECT_NAME"
 
     git config --global user.name "Ribose Packaging"
     git config --global user.email "packages@ribose.com"
