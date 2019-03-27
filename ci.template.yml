@@ -182,6 +182,10 @@ update-repo:
     cd yum
     # check and update each package repo
     for dir in RPMS/* SRPMS; do
+      # All noarch packages must be added to every basearch's repo
+      if [[ "$dir" != "SRPMS" && "$dir" != "RPMS/noarch" && -d "RPMS/noarch" ]]; then
+        rsync -a --ignore-existing RPMS/noarch/* "$dir"
+      fi
       pushd "$dir"
       # generally we shouldn't be modifying existing package files
       # (instead, we should be adding new ones)
@@ -190,7 +194,7 @@ update-repo:
       if [[ -n "$(git status -s .)" ]]; then
         # update the repo
         createrepo --update .
-        # sign upated repodata
+        # sign updated repodata
         rm -f repodata/repomd.xml.asc
         gpg --sign --armor repodata/repomd.xml
         # add the changes
@@ -198,6 +202,7 @@ update-repo:
       fi
       popd
     done
+
     echo "$CI_COMMIT_SHA" > "commits/$PROJECT_NAME"
     git add "commits/$PROJECT_NAME"
 
