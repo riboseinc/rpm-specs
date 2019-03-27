@@ -82,18 +82,15 @@ build:
     # make sure our artifacts are uploaded
     mv ~/rpmbuild/{RPMS,SRPMS} "$CI_PROJECT_DIR"
 
-.deploy:
+sign:
   only:
     - master
-
-sign:
   artifacts:
     name: rpmbuild
     expire_in: 30 days
     paths:
       - RPMS/
       - SRPMS/
-  extends: .deploy
   stage: sign
   script: |
     yum -y install rpmdevtools rpm-sign expect
@@ -118,6 +115,12 @@ sign:
       rpmdev-checksig "$pkg"
       rpm --checksig "$pkg"
     done
+
+.deploy:
+  only:
+    - master
+  dependencies:
+    - sign
 
 github-release:
   extends: .deploy
