@@ -14,31 +14,73 @@ stages:
 
 variables:
   PROJECT_NAME: echo $$CI_PROJECT_NAME | cut -c 10-
-  # just pick the first one by default
-  PRIMARY_RPM: find RPMS/ -name '*.rpm' -print -quit
+  # just pick any by default
+  PRIMARY_RPM: "*.rpm"
+  # This is used to fill in the PACKAGER tag in the packages and must also
+  # match the userid for the signing key
+  PACKAGER: Ribose Packaging <packages@ribose.com>
 
 before_script:
   - |
     set -euxo pipefail
     eval export PROJECT_NAME="$(eval $PROJECT_NAME)"
     yum -y -q install git
+    # write our protected keys to files
+    if [[ -v PACKAGE_SIGNING_KEY_BASE64 ]]; then
+      export SIGNING_KEY_PATH="$(mktemp --tmpdir signing-key.gpg.XXXX)"
+      export DEPLOY_KEY_PATH="$(mktemp --tmpdir deploy-key.XXXX)"
+      # Note that we're avoiding exposing the keys in the job log here.
+      # Another option would be to use python os.getenv+base64.b64decode,
+      # since it's aleady installed at this point.
+      #
+      # Be cautious and do testing if changing these lines (even if job logs are private)
+      bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > '"$SIGNING_KEY_PATH"
+      bash -ceuo pipefail 'echo $GITHUB_YUM_DEPLOY_KEY_BASE64 | base64 -d > '"$DEPLOY_KEY_PATH"
+    fi
 
 build:
   stage: build
   artifacts:
-    name: RPMS
+    name: rpmbuild
     expire_in: 30 days
     paths:
       - RPMS/
+      - SRPMS/
   script: |
     git clone --depth 1 https://github.com/riboseinc/rpm-specs /usr/local/rpm-specs
     ln -s "$CI_PROJECT_DIR" "/usr/local/rpm-specs/$PROJECT_NAME"
     cd "/usr/local/rpm-specs/$PROJECT_NAME"
+    # first, check if we have already published this package to the yum repo
+    commit_url="https://raw.githubusercontent.com/riboseinc/yum/master/commits/${PROJECT_NAME}"
+    if curl -sfI "$commit_url"; then
+      yum_repo_commit=$(curl -sf "$commit_url")
+      rpm_spec_commit=$CI_COMMIT_SHA
+      if [ "$yum_repo_commit" == "$rpm_spec_commit" ]; then
+        echo Package already published. Aborting.
+        exit 1
+      fi
+      # check if the spec commit is newer than the one recorded in the yum repo
+      set +e
+      git merge-base --is-ancestor "$yum_repo_commit" "$rpm_spec_commit"
+      rv=$?
+      set -e
+      case $rv in
+        0) : ;;
+        1) echo "Package commit ${rpm_spec_commit} is not newer than ${yum_repo_commit}. Aborting."
+           exit 1 ;;
+        *) echo "Unable to compare commit ${yum_repo_commit} to ${rpm_spec_commit}. Continuing anyway." ;;
+      esac
+    fi
+    # set some macros
+    echo %packager $PACKAGER > ~/.rpmmacros
+    # build the package
     ./prepare.sh
     # just for informational purposes
     for file in ~/rpmbuild/RPMS/**/*.rpm; do echo "$file"; rpm -qlpv "$file"; echo; done
+    # don't try to process SRPMs larger than 100MiB (publishing to github would fail anyways)
+    find ~/rpmbuild/SRPMS/ -type f -iname '*.src.rpm' -size +100M -delete
     # make sure our artifacts are uploaded
-    mv ~/rpmbuild/RPMS "$CI_PROJECT_DIR"
+    mv ~/rpmbuild/{RPMS,SRPMS} "$CI_PROJECT_DIR"
 
 .deploy:
   only:
@@ -46,28 +88,20 @@ build:
 
 sign:
   artifacts:
-    name: RPMS
+    name: rpmbuild
     expire_in: 30 days
     paths:
       - RPMS/
+      - SRPMS/
   extends: .deploy
   stage: sign
   script: |
     yum -y install rpmdevtools rpm-sign expect
 
-    export private_key_path="$(mktemp --tmpdir XXXX.packager-private.gpg)"
-    # Note that we're avoiding exposing the key in the job log here.
-    # Another option would be to use python os.getenv+base64.b64decode,
-    # since it's aleady installed at this point.
-    #
-    # Be cautious and do testing if changing this line (even if job logs are private)
-    bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > $private_key_path'
-
-    packager="$(gpg --list-packets $private_key_path | grep user.ID | sed -Ee 's/^.*packet: "(.*)"$/\1/')"
-    gpg --import "$private_key_path"
-    for pkg in RPMS/**/*.rpm; do
+    gpg --import "$SIGNING_KEY_PATH"
+    for pkg in RPMS/**/*.rpm SRPMS/*.src.rpm; do
       expect <<EOF
-        spawn rpm --addsign --define "%_gpg_name $packager" "$pkg"
+        spawn rpm --addsign --define "%_gpg_name $PACKAGER" "$pkg"
         expect -ex        "Enter pass phrase: "
         send -- "\r"
         expect eof
@@ -76,8 +110,8 @@ sign:
       ! rpmdev-checksig "$pkg"
       ! rpm --checksig "$pkg"
       # export + import to the rpm db
-      public_key_path="$(mktemp --tmpdir XXXX.packager-public.gpg)"
-      gpg --export --armor "$packager" > "$public_key_path"
+      public_key_path="$(mktemp --tmpdir signing-key-pub.gpg.XXXX)"
+      gpg --export --armor "$PACKAGER" > "$public_key_path"
       rpm --import "$public_key_path"
       # verification should succeed at this point
       # rpmdev-checksig will fail if no signature is present (so it's a good additional check)
@@ -89,7 +123,8 @@ github-release:
   extends: .deploy
   stage: deploy
   script: |
-    pkgver=$(rpm -qp --queryformat '%{VERSION}-%{RELEASE}' $(eval $PRIMARY_RPM))
+    primary_rpm=$(find RPMS/ -name "$PRIMARY_RPM" -print -quit)
+    pkgver=$(rpm -qp --queryformat '%{VERSION}-%{RELEASE}' "$primary_rpm")
     # we need a newish ruby for create-github-release.rb
     yum -y -q install centos-release-scl
     yum -y -q install rh-ruby25
@@ -107,5 +142,68 @@ github-release:
       "$pkgver" \
       --name "$PROJECT_NAME $pkgver" \
       --release-notes "Automatically built in commit $(echo $CI_COMMIT_SHA | cut -c 1-8)." \
-      "$CI_PROJECT_DIR"/RPMS/**/*.rpm
+      "$CI_PROJECT_DIR"/RPMS/**/*.rpm \
+      "$CI_PROJECT_DIR"/SRPMS/*.src.rpm
+
+update-repo:
+  extends: .deploy
+  stage: deploy
+  cache:
+    key: repo-cache
+    paths:
+      - yum
+  script: |
+    yum -y install createrepo rsync
+
+    # set up ssh auth
+    mkdir ~/.ssh
+    eval `ssh-agent`
+    ssh-add "$DEPLOY_KEY_PATH"
+    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+    # Update or clone the yum repo.
+    # Note that the "yum" directory will always exist,
+    # because it is listed as a path in the cache above.
+    if [ -d yum/.git ]; then
+      pushd yum
+      git clean -qdffx
+      git fetch
+      git checkout master
+      git reset --hard origin/master
+      popd
+    else
+      git clone --depth 1 git@github.com:riboseinc/yum yum
+    fi
+
+    gpg --import "$SIGNING_KEY_PATH"
+
+    # copy our new packages to the github repo
+    rsync -a --ignore-existing RPMS SRPMS yum
+    cd yum
+    # check and update each package repo
+    for dir in RPMS/* SRPMS; do
+      pushd "$dir"
+      # generally we shouldn't be modifying existing package files
+      # (instead, we should be adding new ones)
+      git diff --quiet . || false
+      # see if we have new package files here
+      if [[ -n "$(git status -s .)" ]]; then
+        # update the repo
+        createrepo --update .
+        # sign upated repodata
+        rm -f repodata/repomd.xml.asc
+        gpg --sign --armor repodata/repomd.xml
+        # add the changes
+        git add -A .
+      fi
+      popd
+    done
+    echo "$CI_COMMIT_SHA" > "commits/$PROJECT_NAME"
+    git add "commits/$PROJECT_NAME"
+
+    git config --global user.name "Ribose Packaging"
+    git config --global user.email "packages@ribose.com"
+    git commit -m "${PROJECT_NAME}: Update RPMs and repodata"
+    git pull --rebase
+    git push
 
