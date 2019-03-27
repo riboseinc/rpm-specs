@@ -1,0 +1,73 @@
+Overview
+--------
+
+This central repository hosts the following shared resources:
+
+* The scripts used to build the packages.
+* The GitLab CI template used by the package spec repositories (`rpm-spec-*`): link:ci.template.yml[ci.template.yml]
+
+How it Works
+------------
+
+To see how the system works in practice, let's look at an example scenario where a new version of Botan was released.
+
+The first step would be to update the `Version` tag of the `botan2.spec` file in the https://github.com/riboseinc/rpm-spec-botan2[rpm-spec-botan2] repository.
+
+Once committed to the `master` branch, this triggers the following sequence of events:
+
+. The commit is mirrored to GitLab.
+. GitLab CI runs a pipeline as defined in the https://github.com/riboseinc/rpm-spec-botan2/blob/master/.gitlab-ci.yml[.gitlab-ci.yml] file.
+. The pipeline will perform the following actions:
+.. Build the package
+.. Test the package (optional - https://github.com/riboseinc/rpm-spec-botan2/blob/master/.gitlab-ci.yml[example])
+.. Sign the package
+.. Publish the package to GitHub Releases
+.. Publish the package to the https://github.com/riboseinc/yum[riboseinc yum] package repository.
+
+TIP: A package, as used above, may consist of multiple RPMs and SRPMs.
+
+Adding a New Package
+--------------------
+
+Adding a new package requires a bit of setup.
+
+Let's look at an example of adding a package `foo`:
+
+. Create a new repository on GitHub called `rpm-spec-foo`.
+. Import this to GitLab.
+.. Click `New project`.
+.. Select `CI/CD for external repo` at the top.
+.. Click `GitHub`
+.. Find the `rpm-spec-foo` row.
+.. In the `To GitLab` column, select the Ribose `rpm-specs` Group from the dropdown.
+.. In the `To GitLab` column, double check that the name of the repository is identical
+to the GitHub one (`rpm-spec-foo`).
+.. Click `Connect`
+
+TIP: By default, GitLab will replace any period `.` characters with a hyphen `-` in the repository name.
+This will break the build and must be manually corrected as noted above.
+
+Auth Requirements
+-----------------
+
+In order for this system to work, there are a number of authentication & authorization requirements.
+
+The following is an overview of the protected environment variables that enable GitLab CI to
+complete the required tasks.
+
+[%header,cols=2*] 
+|===
+| Environment Variable | Description
+| `PACKAGE_SIGNING_KEY_BASE64` | The base64-encoded passwordless key that is used to sign individual RPMS and yum repodata.
+| `GITHUB_API_TOKEN` | The GitHub API token that is used to create a GitHub Release. This must have write access to all `rpm-spec-*` repositories on GitHub.
+| `GITHUB_YUM_DEPLOY_KEY_BASE64` | The deploy key used to update the https://github.com/riboseinc/yum[riboseinc yum] package repository. This must have write access to the `yum` repository.
+|===
+
+Notes
+-----
+
+* Public Pipelines in GitLab CI can be disabled for the `rpm-specs` Group to improve security.
+This ensures that job logs are not publicly viewable and reduces the chances of leaking sensitive auth credentials.
+* In order for a GitLab CI job to access protected environment variables, it must be run on a protected branch.
+* A protected branch will fail to mirror if the git history has been rewritten (a force push, etc). In this case,
+you can unprotect the branch, re-sync, and re-protect the branch.
