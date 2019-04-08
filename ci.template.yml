@@ -14,7 +14,8 @@ stages:
 
 variables:
   PROJECT_NAME: echo $$CI_PROJECT_NAME | cut -c 10-
-  # just pick any by default
+  # TODO: This should no longer be necessary after the automake116 split.
+  #       We should now be able to get the required info from the the spec.
   PRIMARY_RPM: "*.rpm"
   # This is used to fill in the PACKAGER tag in the packages and must also
   # match the userid for the signing key
@@ -85,6 +86,8 @@ build:
 sign:
   only:
     - master
+  except:
+    - tags
   artifacts:
     name: rpmbuild
     expire_in: 30 days
@@ -119,6 +122,8 @@ sign:
 .deploy:
   only:
     - master
+  except:
+    - tags
   dependencies:
     - sign
 
