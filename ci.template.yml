@@ -98,10 +98,26 @@ sign:
   script: |
     yum -y install rpmdevtools rpm-sign expect
 
-    gpg --import "$SIGNING_KEY_PATH"
+    # install rnp for signing
+    rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+    curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
+    yum -y install rnp
+    # set some macros
+    cat <<EOF >~/.rpmmacros
+    %_gpg_name $PACKAGER
+    %__gpg_check_password_cmd %{_bindir}/rnp \
+      rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --output=-
+    %__gpg_sign_cmd %{_bindir}/rnp \
+      rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --detach --output=%{__signature_filename} %{__plaintext_filename}
+    EOF
+    # remove gpg, just to make sure we're signing with rnp like we are expecting
+    rm $(rpm --eval '%{__gpg}')
+    rm -f /usr/bin/gpg /usr/bin/gpg2
+    # import the key and sign
+    rnpkeys --import "$SIGNING_KEY_PATH"
     for pkg in RPMS/**/*.rpm SRPMS/*.src.rpm; do
       expect <<EOF
-        spawn rpm --addsign --define "%_gpg_name $PACKAGER" "$pkg"
+        spawn rpm --addsign "$pkg"
         expect -ex        "Enter pass phrase: "
         send -- "\r"
         expect eof
@@ -111,7 +127,7 @@ sign:
       ! rpm --checksig "$pkg"
       # export + import to the rpm db
       public_key_path="$(mktemp --tmpdir signing-key-pub.gpg.XXXX)"
-      gpg --export --armor "$PACKAGER" > "$public_key_path"
+      rnpkeys --export-key "$PACKAGER" > "$public_key_path"
       rpm --import "$public_key_path"
       # verification should succeed at this point
       # rpmdev-checksig will fail if no signature is present (so it's a good additional check)
@@ -162,6 +178,10 @@ update-repo:
       - yum
   script: |
     yum -y install createrepo rsync
+    # install rnp for signing
+    rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+    curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
+    yum -y install rnp
 
     # set up ssh auth
     mkdir ~/.ssh
@@ -183,7 +203,7 @@ update-repo:
       git clone --depth 1 git@github.com:riboseinc/yum yum
     fi
 
-    gpg --import "$SIGNING_KEY_PATH"
+    rnpkeys --import "$SIGNING_KEY_PATH"
 
     # copy our new packages to the github repo
     rsync -a --ignore-existing RPMS SRPMS yum
@@ -204,7 +224,7 @@ update-repo:
         createrepo --update .
         # sign updated repodata
         rm -f repodata/repomd.xml.asc
-        gpg --sign --armor repodata/repomd.xml
+        rnp --sign --armor repodata/repomd.xml
         # add the changes
         git add -A .
       fi
