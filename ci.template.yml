@@ -162,7 +162,7 @@ github-release:
     gem install bundler -v 1.16.4
     bundle install
     bundle exec ./create-github-release.rb \
-      "${PROJECT_NAMESPACE:-${CI_PROJECT_NAMESPACE}}/rpm-spec-$PROJECT_NAME" \
+      "${PROJECT_NAMESPACE:-riboseinc}/rpm-spec-$PROJECT_NAME" \
       "$pkgver" \
       --name "$PROJECT_NAME $pkgver" \
       --release-notes "Automatically built in commit $(echo $CI_COMMIT_SHA | cut -c 1-8)." \
