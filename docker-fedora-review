@@ -14,7 +14,7 @@ fi
 eval docker run --cap-add=SYS_ADMIN -it \
   -v "${rpm_specs_dir}":/usr/local/rpm-specs \
   -v "$(cd $(dirname $0)/../fedrepo_req; pwd)":/usr/local/fedrepo_req \
-  fedora:24 \
+  fedora:33 \
   bash -c $EXTRA
 
   # Both fc25 and rawhide would come with mock 1.4+ which would break inside
