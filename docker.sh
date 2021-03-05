@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # Environment variables can be passed to the prepare.sh script by
-# specifying the env var keys with a comma-separated list, like 
+# specifying the env var keys with a comma-separated list, like
 # so:
 #
 #   ENVS=key1,key2,...
 #
-# Current values of the env vars will be propagated as per Docker-run's 
+# Current values of the env vars will be propagated as per Docker-run's
 # documentation.  So, if you have the following:
 #
 #   export key1=hello
@@ -20,25 +20,25 @@ absolute_rpm_spec_dir=$(cd "$(dirname "$0")"/.. 2>/dev/null 1>&2 || exit 1; pwd)
 
 # if [[ $# = 1 && ${1} = 'package' ]]; then
 if [[ $# = 1 ]]; then
-  readonly EXTRA="-c /usr/local/rpm-specs/package/prepare.sh"
+  readonly EXTRA=(-c /usr/local/rpm-specs/package/prepare.sh)
 fi
 
 # Parse out env var names intended for passing into container:
 envs=()
-if [[ ! -z "${ENVS:-}" ]]; then
+if [[ -n "${ENVS:-}" ]]; then
   IFS=, read -r -a envs <<< "${ENVS}"
 fi
 
 # Compose envs strings for `docker run`:
-docker_env_opts=''
+docker_env_opts=()
 for env_key in "${envs[@]}"; do
-  docker_env_opts="${docker_env_opts} -e ${env_key}"
+  docker_env_opts+=(-e "${env_key}")
 done
 
 docker run -it \
   -v "${absolute_rpm_spec_dir}":/usr/local/rpm-specs/package \
   -v "${absolute_rpm_spec_dir}"/common:/usr/local/rpm-specs \
   --workdir /usr/local/rpm-specs/package \
-  ${docker_env_opts} \
+  "${docker_env_opts[@]}" \
   centos:7 \
-  bash $EXTRA
+  bash "${EXTRA[@]}"
