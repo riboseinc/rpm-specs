@@ -24,28 +24,28 @@ install_npm_packages() {
 }
 
 launched_from() {
-  echo "$(ps -o comm= $PPID)"
+  ps -o comm= $PPID
 }
 
 build_package() {
-  local readonly package_name="${1}"
-  local readonly additional_sources=/usr/local/rpm-specs/${package_name}/sources
-  local readonly spec_source=/usr/local/rpm-specs/${package_name}/${package_name}.spec
-  local readonly spec_dest=~/rpmbuild/SPECS/${package_name}.spec
+  local -r package_name="${1}"
+  local -r additional_sources=/usr/local/rpm-specs/${package_name}/sources
+  local -r spec_source=/usr/local/rpm-specs/${package_name}/${package_name}.spec
+  local -r spec_dest=~/rpmbuild/SPECS/${package_name}.spec
 
   rpmdev-setuptree
-  yes | cp -f ${spec_source} ~/rpmbuild/SPECS
+  yes | cp -f "${spec_source}" ~/rpmbuild/SPECS
 
   if [ -d ${additional_sources} ]; then
-    yes | cp -f ${additional_sources}/* ~/rpmbuild/SOURCES
+    yes | cp -f "${additional_sources}"/* ~/rpmbuild/SOURCES
   fi
 
-  spectool -g -R ${spec_dest}
-  yum-builddep -y ${spec_dest}
-  rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
+  spectool -g -R "${spec_dest}"
+  yum-builddep -y "${spec_dest}"
+  rpmbuild "${RPMBUILD_FLAGS:--v -ba}" "${spec_dest}" || \
     {
       echo "rpmbuild failed." >&2;
-      [ $CI ] && exit 1
+      [[ -n "$CI" ]] && exit 1
       if [ "$(launched_from)" != "bash" ]; then
         echo "Now yielding control to bash." >&2 && \
         exec bash
@@ -59,21 +59,21 @@ modify_spec() {
 
   # XXX: this line is necessary because speculate can't find the "License:" of redis-dump
   replace_string="s|^License:[[:space:]]*$|License: MIT|"
-  sed -i "${replace_string}" ${spec_dest}
+  sed -i "${replace_string}" "${spec_dest}"
 
   replace_string="s|%post|%{__mkdir} -p %{buildroot}/%{_bindir}\n\n%post|"
-  sed -i "${replace_string}" ${spec_dest}
+  sed -i "${replace_string}" "${spec_dest}"
   replace_string="s|%files|%files\n%{_bindir}/*\n|"
-  sed -i "${replace_string}" ${spec_dest}
+  sed -i "${replace_string}" "${spec_dest}"
 
   # XXX: somehow speculate makes all executables un-executable
   replace_string="/defattr/d"
-  sed -i "${replace_string}" ${spec_dest}
+  sed -i "${replace_string}" "${spec_dest}"
 
   # speculate expects all packages to have a systemd service, but ours don't so
   # we disable the line of `systemctl enable ...`.
   replace_string="/systemctl/d"
-  sed -i "${replace_string}" ${spec_dest}
+  sed -i "${replace_string}" "${spec_dest}"
 }
 
 # XXX: these lines are used to create /usr/bin/{exec} links, speculate doesn't create them
@@ -90,49 +90,49 @@ add_npm_bin() {
   #echo "ADDNPMBIN-------------------------" >&2
   #echo "${package_name}" >&2
   #echo "${bin_path}" >&2
-  sed -i "${replace_string}" ${spec}
+  sed -i "${replace_string}" "${spec}"
 }
 
 build_npm_package() {
-  local readonly package_name="${1}"
-  #local readonly additional_sources=/usr/local/rpm-specs/${package_name}/sources
-  local readonly sources_source=/usr/lib/node_modules/${package_name}/SOURCES/${package_name}.tar.gz
-  local readonly spec_source=/usr/lib/node_modules/${package_name}/SPECS/${package_name}.spec
-  local readonly spec_dest=~/rpmbuild/SPECS/${package_name}.spec
+  local -r package_name="${1}"
+  #local -r additional_sources=/usr/local/rpm-specs/${package_name}/sources
+  local -r sources_source=/usr/lib/node_modules/${package_name}/SOURCES/${package_name}.tar.gz
+  local -r spec_source=/usr/lib/node_modules/${package_name}/SPECS/${package_name}.spec
+  local -r spec_dest=~/rpmbuild/SPECS/${package_name}.spec
 
-  npm install --global ${package_name}
+  npm install --global "${package_name}"
 
   rpmdev-setuptree
 
-  pushd /usr/lib/node_modules/${package_name}
+  pushd /usr/lib/node_modules/"${package_name}" || return
   speculate
 
   # Somehow speculate creates unnecessary service files for even non-services.
   # Since our packages don't have services we delete them here.
-  rm -f *.service
-  popd
+  rm -f ./*.service
+  popd || return
 
-  yes | cp -f ${sources_source} ~/rpmbuild/SOURCES
-  yes | cp -f ${spec_source} ${spec_dest}
+  yes | cp -f "${sources_source}" ~/rpmbuild/SOURCES
+  yes | cp -f "${spec_source}" "${spec_dest}"
   npm remove --global ${package_name}
 
-  modify_spec ${package_name} ${spec_dest}
+  modify_spec "${package_name}" "${spec_dest}"
 
   # Obtain package.json
-  pushd ~/rpmbuild/SOURCES
-  tar -zvxf ${package_name}.tar.gz package.json
-  bins=$(jq -r '.bin | to_entries | map("\(.value)") | .[]' package.json)
+  pushd ~/rpmbuild/SOURCES || return
+  tar -zvxf "${package_name}.tar.gz" package.json
   #echo "BINSBINSBINSBINBINSBINBINSBINBINSBINSSSS" >&2
   #echo "${bins}" >&2
-  for b in ${bins}; do
-    add_npm_bin ${package_name} ${spec_dest} ${b}
-  done
+  while IFS= read -r b
+  do
+    add_npm_bin "${package_name}" "${spec_dest}" "${b}"
+  done < <(jq -r '.bin | to_entries | map("\(.value)") | .[]' package.json)
 
-  spectool -g -R ${spec_dest}
-  rpmbuild ${RPMBUILD_FLAGS:--v -ba} ${spec_dest} || \
+  spectool -g -R "${spec_dest}"
+  rpmbuild "${RPMBUILD_FLAGS:--v -ba}" "${spec_dest}" || \
     {
       echo "rpmbuild failed." >&2;
-      [ $CI ] && exit 1
+      [[ -n "$CI" ]] && exit 1
       if [ "$(launched_from)" != "bash" ]; then
         echo "Now yielding control to bash." >&2 && \
           exec bash
