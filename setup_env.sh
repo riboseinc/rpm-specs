@@ -42,7 +42,8 @@ build_package() {
 
   spectool -g -R "${spec_dest}"
   yum-builddep -y "${spec_dest}"
-  rpmbuild "${RPMBUILD_FLAGS:--v -ba}" "${spec_dest}" || \
+  # shellcheck disable=SC2086
+  rpmbuild ${RPMBUILD_FLAGS:--v -ba} "${spec_dest}" || \
     {
       echo "rpmbuild failed." >&2;
       [[ -n "$CI" ]] && exit 1
@@ -129,7 +130,8 @@ build_npm_package() {
   done < <(jq -r '.bin | to_entries | map("\(.value)") | .[]' package.json)
 
   spectool -g -R "${spec_dest}"
-  rpmbuild "${RPMBUILD_FLAGS:--v -ba}" "${spec_dest}" || \
+  # shellcheck disable=SC2086
+  rpmbuild ${RPMBUILD_FLAGS:--v -ba} "${spec_dest}" || \
     {
       echo "rpmbuild failed." >&2;
       [[ -n "$CI" ]] && exit 1
