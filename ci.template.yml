@@ -37,6 +37,9 @@ before_script:
       # Be cautious and do testing if changing these lines (even if job logs are private)
       bash -ceuo pipefail 'echo $PACKAGE_SIGNING_KEY_BASE64 | base64 -d > '"$SIGNING_KEY_PATH"
       bash -ceuo pipefail 'echo $GITHUB_YUM_DEPLOY_KEY_BASE64 | base64 -d > '"$DEPLOY_KEY_PATH"
+    elif [[ ! -v SIGNING_KEY_PATH ]]; then
+      >&2 echo "Error: variables PACKAGE_SIGNING_KEY_BASE64 and SIGNING_KEY_PATH not set.  Aborting."
+      exit 1
     fi
 
 build:
