@@ -255,11 +255,11 @@ jobs:
 
       - name: Clone yum repo
         env:
-          GITHUB_YUM_DEPLOY_KEY_BASE64: ${{ secrets.GITHUB_YUM_DEPLOY_KEY_BASE64 }}
+          GHUB_YUM_DEPLOY_KEY_BASE64: ${{ secrets.GHUB_YUM_DEPLOY_KEY_BASE64 }}
         run: |
           # Prepare SSH
           eval `ssh-agent`
-          ssh-add <(< "$GITHUB_YUM_DEPLOY_KEY_BASE64" base64 -d)
+          ssh-add <(< "$GHUB_YUM_DEPLOY_KEY_BASE64" base64 -d)
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
           # Update or clone the yum repo.
@@ -315,11 +315,11 @@ jobs:
 
       - name: Push changes
         env:
-          GITHUB_YUM_DEPLOY_KEY_BASE64: ${{ secrets.GITHUB_YUM_DEPLOY_KEY_BASE64 }}
+          GHUB_YUM_DEPLOY_KEY_BASE64: ${{ secrets.GHUB_YUM_DEPLOY_KEY_BASE64 }}
         run: |
           # Prepare SSH
           eval $(ssh-agent)
-          ssh-add <(< "$GITHUB_YUM_DEPLOY_KEY_BASE64" base64 -d)
+          ssh-add <(< "$GHUB_YUM_DEPLOY_KEY_BASE64" base64 -d)
 
           echo "$GITHUB_SHA" > "commits/$PROJECT_NAME"
           git add "commits/$PROJECT_NAME"
