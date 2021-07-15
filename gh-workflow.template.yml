@@ -1,0 +1,331 @@
+---
+
+name: build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'release/**'
+
+env:
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+  LC_LANG: en_US.UTF-8
+  PACKAGER: Ribose Packaging <packages@ribose.com>
+  PRIMARY_RPM: "*.rpm"
+
+defaults:
+  runs-on: ubuntu-latest
+  container:
+    image: centos:7
+  timeout-minutes: 70
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    steps:
+      - name: Set up environment
+        run: |
+          echo "PROJECT_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+      - name: Install prerequisites
+        run: |
+          echo "PROJECT_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+          yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
+          yum -y install git
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          repository: riboseinc/rpm-specs
+          path: /usr/local/rpm-specs
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build package
+        run: |
+          ln -s "$GITHUB_WORKSPACE" "/usr/local/rpm-specs/$PROJECT_NAME"
+          pushd "/usr/local/rpm-specs/$PROJECT_NAME"
+
+          # first, check if we have already published this package to the yum repo
+          commit_url="https://raw.githubusercontent.com/riboseinc/yum/master/commits/${PROJECT_NAME}"
+          if curl -sfI "$commit_url"; then
+            yum_repo_commit=$(curl -sf "$commit_url")
+            rpm_spec_commit=$GITHUB_SHA
+            if [[ "$yum_repo_commit" = "$rpm_spec_commit" ]]; then
+              >&2 echo "Package already published.  Aborting."
+              exit 1
+            fi
+
+            # check if the spec commit is newer than the one recorded in the yum repo
+            set +e
+            git merge-base --is-ancestor "$yum_repo_commit" "$rpm_spec_commit"
+            rv=$?
+            set -e
+
+            case $rv in
+              0) : ;;
+              1) >&2 echo "Package commit ${rpm_spec_commit} is not newer than ${yum_repo_commit}. Aborting."
+                 exit 1 ;;
+              *) >&2 echo "Unable to compare commit ${yum_repo_commit} to ${rpm_spec_commit}. Continuing anyway." ;;
+            esac
+          fi
+
+          # set some macros
+          echo %packager $PACKAGER > ~/.rpmmacros
+
+          # build the package
+          ./prepare.sh
+
+          # just for informational purposes
+          for file in ~/rpmbuild/RPMS/**/*.rpm; do
+            echo "$file"
+            rpm -qlpv "$file"
+            echo
+          done
+
+          # don't try to process SRPMs larger than 100MiB (publishing to github would fail anyways)
+          find ~/rpmbuild/SRPMS/ -type f -iname '*.src.rpm' -size +100M -delete
+
+          # make sure our artifacts are uploaded
+          mv ~/rpmbuild/{RPMS,SRPMS} "$GITHUB_WORKSPACE"
+
+          popd
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: rpmbuild
+          path: |
+            RPMS/
+            SRPMS/
+          retention-days: 30
+
+  sign:
+    needs: [build]
+    # Let it sign.  This is a code path that needs testing.
+    # if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: rpmbuild
+          path: |
+            RPMS/
+            SRPMS/
+
+      - name: Install prerequisites
+        run: |
+          # install rnp for signing
+          rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+          curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
+          yum -y install rnp rpmdevtools rpm-sign expect
+
+          # remove gpg, just to make sure we're signing with rnp like we are expecting
+          rpm --eval '%{__gpg}' | xargs rm
+          rm -f /usr/bin/gpg /usr/bin/gpg2
+
+      - name: Set up RPM macros
+        run: |
+          # set some macros
+          cat <<EOF >~/.rpmmacros
+          %_gpg_name $PACKAGER
+          %__gpg_check_password_cmd %{_bindir}/rnp \
+            rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --output=-
+          %__gpg_sign_cmd %{_bindir}/rnp \
+            rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --detach --output=%{__signature_filename} %{__plaintext_filename}
+          EOF
+
+      - name: Sign it
+        env:
+          PACKAGE_SIGNING_KEY_BASE64: ${{ secrets.PACKAGE_SIGNING_KEY_BASE64 }}
+        run: |
+          # import the key and sign
+          rnpkeys --import <(<"$PACKAGE_SIGNING_KEY_BASE64" base64 -d)
+
+          for pkg in RPMS/**/*.rpm SRPMS/*.src.rpm; do
+            expect <<-EOF
+              spawn rpm --addsign "$pkg"
+              expect "Enter pass phrase:"
+              send -- "\r"
+              expect eof
+            EOF
+
+            # verification should fail since we haven't imported the public key
+            ! rpmdev-checksig "$pkg"
+            ! rpm --checksig "$pkg"
+
+            # export + import to the rpm db
+            public_key_path="$(mktemp --tmpdir signing-key-pub.gpg.XXXX)"
+            rnpkeys --export-key "$PACKAGER" > "$public_key_path"
+            rpm --import "$public_key_path"
+
+            # verification should succeed at this point
+            # rpmdev-checksig will fail if no signature is present (so it's a good additional check)
+            rpmdev-checksig "$pkg"
+            rpm --checksig "$pkg"
+          done
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: rpmbuild
+          path: |
+            RPMS/
+            SRPMS/
+          retention-days: 30
+
+  github-release:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    needs: [sign]
+    steps:
+      - name: Set up environment
+        run: |
+          echo "PROJECT_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          repository: riboseinc/create-github-release
+          path: create-github-release
+
+      - name: Install prerequisites
+        run: |
+          # we need a newish ruby for create-github-release.rb
+          yum -y -q install centos-release-scl
+          yum -y -q install rh-ruby25
+          primary_rpm=$(find RPMS/ -name "$PRIMARY_RPM" -print -quit)
+          pkgver=$(rpm -qp --queryformat '%{VERSION}-%{RELEASE}' "$primary_rpm")
+
+          # workaround for scl_source bug/limitation
+          set +eu
+          source scl_source enable rh-ruby25
+          set -eu
+
+          pushd create-github-release
+          gem install bundler -v 1.16.4
+          bundle install
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: rpmbuild
+          path: |
+            RPMS/
+            SRPMS/
+
+      - name: Release it
+        run: |
+          bundle exec ./create-github-release.rb \
+            "riboseinc/rpm-spec-$PROJECT_NAME" \
+            "$pkgver" \
+            --name "$PROJECT_NAME $pkgver" \
+            --release-notes "Automatically built in commit ${GITHUB_SHA:0:8}." \
+            "$GITHUB_WORKSPACE"/RPMS/**/*.rpm \
+            "$GITHUB_WORKSPACE"/SRPMS/*.src.rpm
+
+  update-repo:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    needs: [sign]
+    # TODO
+    # cache:
+    #   key: repo-cache
+    #   paths:
+    #     - yum
+    steps:
+      - name: Set up environment
+        run: |
+          echo "PROJECT_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+      - name: Install prerequisites
+        env:
+          PACKAGE_SIGNING_KEY_BASE64: ${{ secrets.PACKAGE_SIGNING_KEY_BASE64 }}
+        run: |
+          yum -y install createrepo rsync
+
+          # install rnp for signing
+          rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+          curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
+          yum -y install rnp
+
+          rnpkeys --import <(<"$PACKAGE_SIGNING_KEY_BASE64" base64 -d)
+
+          # set up ssh auth
+          mkdir ~/.ssh
+
+      - name: Clone yum repo
+        env:
+          GITHUB_YUM_DEPLOY_KEY_BASE64: ${{ secrets.GITHUB_YUM_DEPLOY_KEY_BASE64 }}
+        run: |
+          # Prepare SSH
+          eval `ssh-agent`
+          ssh-add <(< "$GITHUB_YUM_DEPLOY_KEY_BASE64" base64 -d)
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+          # Update or clone the yum repo.
+          # Note that the "yum" directory will always exist,
+          # because it is listed as a path in the cache above.
+          if [[ -d yum/.git ]]; then
+            pushd yum
+            git clean -qdffx
+            git fetch
+            git checkout master
+            git reset --hard origin/master
+            popd
+          else
+            git clone --depth 1 git@github.com:riboseinc/yum yum
+          fi
+
+          # copy our new packages to the github repo
+          rsync -a --ignore-existing RPMS SRPMS yum
+
+      - name: Check and update each package repo
+        run: |
+          pushd yum
+
+          for dir in RPMS/* SRPMS; do
+
+            # All noarch packages must be added to every basearch's repo
+            if [[ "$dir" != "SRPMS" && "$dir" != "RPMS/noarch" && -d "RPMS/noarch" ]]; then
+              rsync -a --ignore-existing RPMS/noarch/* "$dir"
+            fi
+            pushd "$dir"
+
+            # generally we shouldn't be modifying existing package files
+            # (instead, we should be adding new ones)
+            git diff --quiet . || false
+
+            # see if we have new package files here
+            if [[ -n "$(git status -s .)" ]]; then
+
+              # update the repo
+              createrepo --update .
+
+              # sign updated repodata
+              rm -f repodata/repomd.xml.asc
+              rnp --sign --armor repodata/repomd.xml
+
+              # add the changes
+              git add -A .
+
+            fi
+            popd
+          done
+          popd
+
+      - name: Push changes
+        env:
+          GITHUB_YUM_DEPLOY_KEY_BASE64: ${{ secrets.GITHUB_YUM_DEPLOY_KEY_BASE64 }}
+        run: |
+          # Prepare SSH
+          eval $(ssh-agent)
+          ssh-add <(< "$GITHUB_YUM_DEPLOY_KEY_BASE64" base64 -d)
+
+          echo "$GITHUB_SHA" > "commits/$PROJECT_NAME"
+          git add "commits/$PROJECT_NAME"
+
+          git config --global user.name "Ribose Packaging"
+          git config --global user.email "packages@ribose.com"
+          git commit -m "${PROJECT_NAME}: Update RPMs and repodata"
+          git pull --rebase
+          git push
