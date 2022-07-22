@@ -35,10 +35,10 @@ for env_key in "${envs[@]}"; do
   docker_env_opts+=(-e "${env_key}")
 done
 
-docker run -it \
+docker run --platform linux/amd64 -it \
   -v "${absolute_rpm_spec_dir}":/usr/local/rpm-specs/package \
   -v "${absolute_rpm_spec_dir}"/common:/usr/local/rpm-specs \
   --workdir /usr/local/rpm-specs/package \
   "${docker_env_opts[@]}" \
-  centos:7 \
+  amd64/centos:7 \
   bash "${EXTRA[@]}"
