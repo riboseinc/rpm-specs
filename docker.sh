@@ -36,8 +36,8 @@ for env_key in "${envs[@]}"; do
 done
 
 docker run --platform linux/amd64 -it \
+  -v "${absolute_rpm_spec_dir}"/rpm-specs:/usr/local/rpm-specs \
   -v "${absolute_rpm_spec_dir}":/usr/local/rpm-specs/package \
-  -v "${absolute_rpm_spec_dir}"/common:/usr/local/rpm-specs \
   --workdir /usr/local/rpm-specs/package \
   "${docker_env_opts[@]}" \
   amd64/centos:7 \
