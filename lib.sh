@@ -2,6 +2,7 @@
 
 install_base_packages() {
   rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+  rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages-next.pub
   curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
 
   yum install -y epel-release

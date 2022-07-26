@@ -103,6 +103,7 @@ sign:
 
     # install rnp for signing
     rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+    rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages-next.pub
     curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
     yum -y install rnp
     # set some macros
@@ -183,6 +184,7 @@ update-repo:
     yum -y install createrepo rsync
     # install rnp for signing
     rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages.pub
+    rpm --import https://github.com/riboseinc/yum/raw/master/ribose-packages-next.pub
     curl -L https://github.com/riboseinc/yum/raw/master/ribose.repo > /etc/yum.repos.d/ribose.repo
     yum -y install rnp
 
