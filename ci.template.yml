@@ -110,9 +110,9 @@ sign:
     cat <<EOF >~/.rpmmacros
     %_gpg_name $PACKAGER
     %__gpg_check_password_cmd %{_bindir}/rnp \
-      rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --output=-
+      rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --hash sha256 --output=-
     %__gpg_sign_cmd %{_bindir}/rnp \
-      rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --detach --output=%{__signature_filename} %{__plaintext_filename}
+      rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --hash sha256 --detach --output=%{__signature_filename} %{__plaintext_filename}
     EOF
     # remove gpg, just to make sure we're signing with rnp like we are expecting
     rm $(rpm --eval '%{__gpg}')
@@ -229,7 +229,7 @@ update-repo:
         createrepo --update .
         # sign updated repodata
         rm -f repodata/repomd.xml.asc
-        rnp --sign --armor repodata/repomd.xml
+        rnp --sign --hash sha256 --armor repodata/repomd.xml
         # add the changes
         git add -A .
       fi
