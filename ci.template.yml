@@ -113,6 +113,8 @@ sign:
       rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --hash sha256 --output=-
     %__gpg_sign_cmd %{_bindir}/rnp \
       rnp --pass-fd 3 --userid "%{_gpg_name}" --sign --hash sha256 --detach --output=%{__signature_filename} %{__plaintext_filename}
+    %_source_filedigest_algorithm 8
+    %_binary_filedigest_algorithm 8
     EOF
     # remove gpg, just to make sure we're signing with rnp like we are expecting
     rm $(rpm --eval '%{__gpg}')
