@@ -14,19 +14,20 @@ _E.g._,
 
 Assuming you have cloned one of the `rpm-spec-*` repos, e.g. `rpm-spec-rnp`:
 
-[source,console]
-----
-$ git clone https://github.com/riboseinc/rpm-spec-rnp
-$ cd rpm-spec-rnp
-----
-
 [source,sh]
 ----
-./docker.sh package
+git clone https://github.com/riboseinc/rpm-spec-rnp
+cd rpm-spec-rnp
+git clone https://github.com/riboseinc/rpm-specs
+cd rpm-specs
+./docker.sh
 ----
 
-[NOTE]
-The first argument `package` can actually be anything.
+[source,console]
+----
+$ ./prepare.sh
+----
+
 
 == Running the container and building manually
 
