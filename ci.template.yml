@@ -117,8 +117,9 @@ sign:
     %_binary_filedigest_algorithm 8
     EOF
     # remove gpg, just to make sure we're signing with rnp like we are expecting
-    rm $(rpm --eval '%{__gpg}')
-    rm -f /usr/bin/gpg /usr/bin/gpg2
+    mv -f $(rpm --eval '%{__gpg}'){,.bkup} || :
+    mv -f /usr/bin/gpg{,.bkup} || :
+    mv -f /usr/bin/gpg2{,.bkup} || :
     # import the key and sign
     rnpkeys --import "$SIGNING_KEY_PATH"
     for pkg in RPMS/**/*.rpm SRPMS/*.src.rpm; do

@@ -125,8 +125,9 @@ jobs:
           yum -y install rnp rpmdevtools rpm-sign expect
 
           # remove gpg, just to make sure we're signing with rnp like we are expecting
-          rpm --eval '%{__gpg}' | xargs rm
-          rm -f /usr/bin/gpg /usr/bin/gpg2
+          mv -f $(rpm --eval '%{__gpg}'){,.bkup} || :
+          mv -f /usr/bin/gpg{,.bkup} || :
+          mv -f /usr/bin/gpg2{,.bkup} || :
 
       - name: Set up RPM macros
         run: |
