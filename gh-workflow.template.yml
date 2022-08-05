@@ -159,7 +159,7 @@ jobs:
 
             # verification should fail since we haven't imported the public key
             ! rpmdev-checksig "$pkg"
-            ! rpm --checksig "$pkg"
+            ! rpm --checksig -v "$pkg"
 
             # export + import to the rpm db
             public_key_path="$(mktemp --tmpdir signing-key-pub.gpg.XXXX)"
@@ -169,7 +169,7 @@ jobs:
             # verification should succeed at this point
             # rpmdev-checksig will fail if no signature is present (so it's a good additional check)
             rpmdev-checksig "$pkg"
-            rpm --checksig "$pkg"
+            rpm --checksig -v "$pkg"
           done
 
       - uses: actions/upload-artifact@v2
